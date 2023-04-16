@@ -14,6 +14,7 @@ def get_data(url):
     params_info = tree.css_first('.padded-container-content').css('div')
     params_desc = tree.css_first('.product-intro-description').css('div')
     print(title)
+
     for row in params_cost:
         cost = row.css_first('div').text().strip()
         print(cost)
@@ -30,9 +31,19 @@ def get_data(url):
 
     for row in params_desc:
         info_one = row.css_first('div').text().strip()
-        lines = [info_one[i:i + 50] for i in range(0, len(info_one), 50)]
+        words = info_one.split()
+        lines = []
+        current_line = ''
+        for word in words:
+            if len(current_line + ' ' + word) > 100:
+                lines.append(current_line)
+                current_line = word
+            else:
+                current_line += ' ' + word
+        if current_line:
+            lines.append(current_line)
         formatted_text = '\n'.join(lines)
-        print('\n', 'Description:', '\n', formatted_text)
+        print('\nDescription:\n', formatted_text)
 
 
 def main():
@@ -40,7 +51,6 @@ def main():
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
-
 
 
 if __name__ == '__main__':
