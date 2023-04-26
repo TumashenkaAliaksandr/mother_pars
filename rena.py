@@ -1,5 +1,18 @@
 import requests
 from bs4 import BeautifulSoup
+import csv
+
+
+FILEPARAMS = 'tab_rena.csv'
+
+def create_csv(filename, order):
+    with open(filename, 'w', encoding='utf-8', newline='') as file:
+        csv.DictWriter(file, fieldnames=order).writeheader()
+
+
+def write_csv(filename, data):
+    with open(filename, 'a', encoding='utf-8', newline='') as file:
+        csv.DictWriter(file, fieldnames=list(data)).writerow(data)
 
 
 def get_data(url):
@@ -28,10 +41,18 @@ def get_data(url):
 
     print(title, cost, formatted_text, img_src, sep='\n')
 
+    data = {'title': title, 'cost': cost, 'description': formatted_text, 'img_src': img_src}
+    write_csv(FILEPARAMS, data)
+
 
 def main():
-    url = 'https://renaindia.com/collections/kitchenware-all/products/3-in-1-compact-rotary-peeler'
-    get_data(url)
+    order = ['title', 'cost', 'description',  'img_src']
+    create_csv(FILEPARAMS,order)
+
+    with open('urls_rena.csv', 'r', encoding='utf-8') as file:
+        for line in csv.DictReader(file):
+            url = line['url']
+            get_data(url)
 
 
 if __name__ == '__main__':

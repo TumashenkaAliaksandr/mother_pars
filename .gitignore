@@ -136,3 +136,7 @@ GitHub.sublime-settings
 !.vscode/launch.json
 !.vscode/extensions.json
 .history
+
+tab_rena.csv
+urls_rena.csv
+urls_solar.csv
