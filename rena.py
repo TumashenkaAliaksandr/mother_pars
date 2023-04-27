@@ -1,4 +1,5 @@
 import requests
+import re
 from bs4 import BeautifulSoup
 import csv
 
@@ -21,8 +22,12 @@ def get_data(url):
 
     title = soup.find('h1', {'class': 'product_name'}).text.strip()
     price = soup.find('div', {'class': 'price-ui'})
-    cost = price.find('span').text.replace('Rs.', '').strip()
+    cost_text = price.find('span').text.replace('Rs.', '').replace(',', '').strip()
+    cost = float(re.search(r'\d+(\.\d+)?', cost_text).group())
+    new_cost = round(cost * 1.1, 2)
+
     desc = soup.find('div', {'class': 'description'}).text.strip()
+    brand = 'Rena'
 
     lines = []
     current_line = ''
@@ -39,14 +44,14 @@ def get_data(url):
     img_container = soup.find('div', {'class': 'image__container'})
     img_src = "https:" + img_container.find('img')['data-src']
 
-    print(title, cost, formatted_text, img_src, sep='\n')
+    print(title, cost, (new_cost, '+10%'), formatted_text, img_src, brand, sep='\n')
 
-    data = {'title': title, 'cost': cost, 'description': formatted_text, 'img_src': img_src}
+    data = {'title': title, 'new_cost +10%': new_cost,  'description': formatted_text, 'img_src': img_src, 'brand': brand}
     write_csv(FILEPARAMS, data)
 
 
 def main():
-    order = ['title', 'cost', 'description',  'img_src']
+    order = ['title', 'new_cost +10%', 'description',  'img_src', 'brand']
     create_csv(FILEPARAMS,order)
 
     with open('urls_rena.csv', 'r', encoding='utf-8') as file:
