@@ -6,12 +6,13 @@ import csv
 
 FILEPARAMS = 'tab_rena.csv'
 
+
 def create_csv(filename, order):
     with open(filename, 'w', encoding='utf-8', newline='') as file:
         csv.DictWriter(file, fieldnames=order).writeheader()
 
 
-def write_csv(filename, data):
+def write_data_csv(filename, data):
     with open(filename, 'a', encoding='utf-8', newline='') as file:
         csv.DictWriter(file, fieldnames=list(data)).writerow(data)
 
@@ -46,14 +47,14 @@ def get_data(url):
 
     print(title, cost, (new_cost, '+10%'), formatted_text, img_src, brand, sep='\n')
 
-    data = {'title': title, 'new_cost +10%': new_cost,  'description': formatted_text, 'img_src': img_src, 'brand': brand}
-    write_csv(FILEPARAMS, data)
+    data = {'title': title, 'new_cost +10%': new_cost,  'description': formatted_text,
+            'img_src': img_src, 'brand': brand}
+    write_data_csv(FILEPARAMS, data)
 
 
 def main():
     order = ['title', 'new_cost +10%', 'description',  'img_src', 'brand']
-    create_csv(FILEPARAMS,order)
-
+    create_csv(FILEPARAMS, order)
     with open('urls_rena.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']

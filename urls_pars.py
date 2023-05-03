@@ -3,7 +3,11 @@ from bs4 import BeautifulSoup
 import csv
 import time
 
-URLS = [    'https://renaindia.com/collections/kitchenware-all',    'https://renaindia.com/collections/hostware',    'https://renaindia.com/collections/bakeware-all',]
+URLS = [
+    'https://renaindia.com/collections/kitchenware-all',
+    'https://renaindia.com/collections/hostware',
+    'https://renaindia.com/collections/bakeware-all',
+]
 FILENAME = 'urls_rena.csv'
 
 
