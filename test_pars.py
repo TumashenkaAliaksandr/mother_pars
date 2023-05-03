@@ -10,10 +10,11 @@ def get_data(url):
     price = soup.find('div', {'class': 'product-price'})
     cost = price.find('span').text.strip()
     desc = soup.find('div', {'class': 'composed-description'}).text.strip()
-    desc_photo = soup.find('div', {'class': 'me-3'})
-    photo_desc = desc_photo.find('img')['src']
-    print(photo_desc)
 
+    photo_desc = []
+    desc_photo = soup.find_all('div', {'class': 'me-3'})
+    for dp in desc_photo:
+        photo_desc.append(dp.find('img')['src'])
 
     lines = []
     current_line = ''
@@ -30,8 +31,9 @@ def get_data(url):
     img_container = soup.find('div', {'class': 'product-image'})
     img_src = img_container.find('img')['src']
 
+    photo_desc_str = '\n'.join(photo_desc)
 
-    return title, cost, formatted_text, img_src, photo_desc
+    return title, cost, formatted_text, img_src, photo_desc_str
 
 
 def main():
