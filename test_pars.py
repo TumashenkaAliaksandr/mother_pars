@@ -11,10 +11,10 @@ def get_data(url):
     cost = price.find('span').text.strip()
     desc = soup.find('div', {'class': 'composed-description'}).text.strip()
 
-    photo_desc = []
+    photo_desc = set()
     desc_photo = soup.find_all('div', {'class': 'me-3'})
     for dp in desc_photo:
-        photo_desc.append(dp.find('img')['src'])
+        photo_desc.add(dp.find('img')['src'])
 
     lines = []
     current_line = ''
