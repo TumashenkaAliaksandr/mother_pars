@@ -10,6 +10,9 @@ def get_data(url):
     price = soup.find('div', {'class': 'product-price'})
     cost = price.find('span').text.strip()
     desc = soup.find('div', {'class': 'composed-description'}).text.strip()
+    category_text = soup.find('li', {'class': 'parent active'}).text.strip()
+    category_words = category_text.split()[:2]
+    category = ' '.join(category_words)
 
     photo_desc = set()
     desc_photo = soup.find_all('div', {'class': 'me-3'})
@@ -33,17 +36,18 @@ def get_data(url):
 
     photo_desc_str = '\n'.join(photo_desc)
 
-    return title, cost, formatted_text, img_src, photo_desc_str
+    return title, cost, formatted_text, img_src, category, photo_desc_str
 
 
 def main():
-    url = 'https://autosolar.es/kits-solares-conexion-red/kit-solar-autoconsumo-fotovoltaico-6000w-10950kwhano-ingeteam'
-    title, cost, formatted_text, img_src, photo_desc = get_data(url)
-    print(title, cost, formatted_text, img_src, photo_desc, sep='\n')
+    url = 'https://autosolar.es/kit-solar-aislada/kit-solar-instalacion-aislada-3000w-24v-6000whdia'
+    title, cost, formatted_text, img_src, category, photo_desc = get_data(url)
+    print(title, cost, formatted_text, img_src, category, photo_desc, sep='\n')
 
 
 if __name__ == '__main__':
     main()
+
 
 
 
