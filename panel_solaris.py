@@ -1,5 +1,4 @@
 import requests
-import re
 from bs4 import BeautifulSoup
 import csv
 
@@ -24,7 +23,10 @@ def get_data(url):
     title = soup.find('h1', {'class': 'title'}).text.strip()
     price = soup.find('div', {'class': 'product-price'})
     cost = price.find('span').text.strip()
-    desc = soup.find('div', {'class': 'composed-description'}).text.strip()
+
+    desc_container = soup.find('div', {'class': 'tab active'})
+    desc = desc_container.text.strip() if desc_container else ''
+
     category_text = soup.find('li', {'class': 'parent active'}).text.strip()
     category_words = category_text.split()[:2]
     category = ' '.join(category_words)
@@ -53,7 +55,7 @@ def get_data(url):
 
     print(title, cost, formatted_text, img_src, category, photo_desc_str)
 
-    data = {'title': title, 'cost': cost,  'description': formatted_text,
+    data = {'title': title, 'cost': cost, 'description': formatted_text,
             'img_src': img_src, 'photo_desc_str': photo_desc_str, 'category': category}
     write_data_csv(FILEPARAMS, data)
 
