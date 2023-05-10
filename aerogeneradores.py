@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import csv
 
 
-FILEPARAMS = 'cargador_coche_electrico.csv'
+FILEPARAMS = 'aerogeneradores.csv'
 
 
 def create_csv(filename, order):
@@ -27,7 +27,7 @@ def get_data(url):
     desc_container = soup.find('div', {'class': 'tab active'})
     desc = desc_container.text.strip() if desc_container else ''
 
-    category = 'Cargador_coche_electrico'
+    category = 'Aerogeneradores'
 
     photo_desc = set()
     desc_photo = soup.find_all('div', {'class': 'me-3'})
@@ -61,7 +61,7 @@ def get_data(url):
 def main():
     order = ['title', 'cost', 'description',  'img_src', 'photo_desc_str', 'category']
     create_csv(FILEPARAMS, order)
-    with open('urls_coche_electrico_tab.csv', 'r', encoding='utf-8') as file:
+    with open('urls_aerogeneradores_tab.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
