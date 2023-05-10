@@ -1,10 +1,12 @@
+import os
 import requests
-import re
 from bs4 import BeautifulSoup
 import csv
 
 
-FILEPARAMS = 'solar_kits.csv'
+directory = '../done_csv'
+filename = 'aerogeneradores.csv'
+FILEPARAMS = os.path.join(directory, filename)
 
 
 def create_csv(filename, order):
@@ -24,10 +26,11 @@ def get_data(url):
     title = soup.find('h1', {'class': 'title'}).text.strip()
     price = soup.find('div', {'class': 'product-price'})
     cost = price.find('span').text.strip()
-    desc = soup.find('div', {'class': 'composed-description'}).text.strip()
-    category_text = soup.find('li', {'class': 'parent active'}).text.strip()
-    category_words = category_text.split()[:2]
-    category = ' '.join(category_words)
+
+    desc_container = soup.find('div', {'class': 'tab active'})
+    desc = desc_container.text.strip() if desc_container else ''
+
+    category = 'Aerogeneradores'
 
     photo_desc = set()
     desc_photo = soup.find_all('div', {'class': 'me-3'})
@@ -53,7 +56,7 @@ def get_data(url):
 
     print(title, cost, formatted_text, img_src, category, photo_desc_str)
 
-    data = {'title': title, 'cost': cost,  'description': formatted_text,
+    data = {'title': title, 'cost': cost, 'description': formatted_text,
             'img_src': img_src, 'photo_desc_str': photo_desc_str, 'category': category}
     write_data_csv(FILEPARAMS, data)
 
@@ -61,7 +64,7 @@ def get_data(url):
 def main():
     order = ['title', 'cost', 'description',  'img_src', 'photo_desc_str', 'category']
     create_csv(FILEPARAMS, order)
-    with open('urls_solar.csv', 'r', encoding='utf-8') as file:
+    with open('../urls_csv/urls_aerogeneradores_tab.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)

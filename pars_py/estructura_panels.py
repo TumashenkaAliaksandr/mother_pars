@@ -1,9 +1,11 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 import csv
 
-
-FILEPARAMS = 'estructura_panel.csv'
+directory = '../done_csv'
+filename = 'estructura_panel.csv'
+FILEPARAMS = os.path.join(directory, filename)
 
 
 def create_csv(filename, order):
@@ -63,7 +65,7 @@ def get_data(url):
 def main():
     order = ['title', 'cost', 'description',  'img_src', 'photo_desc_str', 'category']
     create_csv(FILEPARAMS, order)
-    with open('urls_estructura_panel.csv', 'r', encoding='utf-8') as file:
+    with open('../urls_csv/urls_estructura_panel.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
