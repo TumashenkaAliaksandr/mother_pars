@@ -23,13 +23,14 @@ def get_data(url):
     html = requests.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
 
-    title = soup.find('h1', {'class': 'title'}).text.strip()
+    title_element = soup.find('h1', {'class': 'title'})
+    title = title_element.text.strip() if title_element else ''
     price = soup.find('div', {'class': 'product-price'})
-    cost = price.find('span').text.strip()
-    desc = soup.find('div', {'class': 'composed-description'}).text.strip()
-    category_text = soup.find('li', {'class': 'parent active'}).text.strip()
-    category_words = category_text.split()[:2]
-    category = ' '.join(category_words)
+    cost_element = price.find('span') if price else None
+    cost = cost_element.text.strip() if cost_element else ''
+    desc_container = soup.find('div', {'class': 'composed-description'})
+    desc = desc_container.text.strip() if desc_container else ''
+    category = 'Solar Kits'
 
     photo_desc = set()
     desc_photo = soup.find_all('div', {'class': 'me-3'})
