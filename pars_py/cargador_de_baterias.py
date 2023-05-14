@@ -64,7 +64,7 @@ def get_data(url):
 def main():
     order = ['title', 'cost', 'description',  'img_src', 'photo_desc_str', 'category']
     create_csv(FILEPARAMS, order)
-    with open('../urls_csv/urls_cargador_tab.csv', 'r', encoding='utf-8') as file:
+    with open('../urls_csv/urls_cargador_de_baterias.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
