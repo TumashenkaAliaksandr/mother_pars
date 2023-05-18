@@ -26,7 +26,8 @@ def get_data(url):
     title = soup.find('h1', {'class': 'product-single__title'}).text.strip()
 
     price_element = soup.find('span', {'class': 'product-single__price'})
-    price = price_element.text.replace('Rs.', '').replace(',', '').strip() if price_element else 'N/A'
+    price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1,
+                  2) if price_element else 'N/A'
 
     desc_container = soup.find('div', {'class': 'product-single__description'})
     desc = desc_container.text.strip() if desc_container else ''
