@@ -9,7 +9,6 @@ filename = 'folkbazar.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 
-
 def create_csv(filename, order):
     with open(filename, 'w', encoding='utf-8', newline='') as file:
         csv.DictWriter(file, fieldnames=order).writeheader()
@@ -46,22 +45,17 @@ def get_data(url):
         lines.append(current_line)
     formatted_text = '\n'.join(lines)
 
-    img_container = soup.find('div', {'class': 'product-single__photo'})
-    img_src = 'http' + img_container.find('img')['src'] if img_container else ''
+    image_elements = soup.select('div.product-single__photo img')
+    image_urls = ['http:' + img["src"].strip("[]'") for img in image_elements]
 
-    img_container_two = soup.find('div', {'class': 'product - single__thumbnail'})
-    img_src_two = 'http' + img_container.find('img')['src'] if img_container else ''
+    print(title, price, formatted_text, ', '.join(image_urls), category)
 
-
-    print(title, price, formatted_text, img_src, img_src_two, category)
-
-    data = {'title': title, 'price': price, 'description': formatted_text,
-            'img_src': img_src, 'img_src_two': img_src_two, 'category': category}
+    data = {'title': title, 'price': price, 'description': formatted_text, 'image_urls': ', '.join(image_urls), 'category': category}
     write_data_csv(FILEPARAMS, data)
 
 
 def main():
-    order = ['title', 'cost', 'description',  'img_src', 'img_src_two', 'category']
+    order = ['title', 'price', 'description', 'image_urls', 'category']
     create_csv(FILEPARAMS, order)
     with open('templates/../urls_csv/urls_folkbazar.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
