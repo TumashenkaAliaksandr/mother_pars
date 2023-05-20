@@ -5,7 +5,7 @@ import csv
 
 
 directory = 'templates/../done_csv'
-filename = 'folkbazar.csv'
+filename = 'bhumpas.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 
@@ -32,7 +32,7 @@ def get_data(url):
     desc_container = soup.find('div', {'class': 'product-single__description'})
     desc = desc_container.text.strip() if desc_container else ''
 
-    category = 'religious-statues'
+    category = 'Bhumpas'
 
     lines = []
     current_line = ''
@@ -63,7 +63,7 @@ def get_data(url):
 def main():
     order = ['title', 'price', 'description', 'image_urls', 'category', 'variations']
     create_csv(FILEPARAMS, order)
-    with open('templates/../urls_csv/urls_folkbazar.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../urls_csv/urls_folkbazar_bhumpas.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
