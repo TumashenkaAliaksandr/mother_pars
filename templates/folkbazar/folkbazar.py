@@ -49,14 +49,19 @@ def get_data(url):
     image_elements = soup.select('div.product-single__photo img')
     image_urls = ['http:' + img["src"].strip("[]'") for img in image_elements]
 
-    print(title, price, formatted_text, ', '.join(image_urls), category)
+    size_elements = soup.select('select.product-single__option[name="size"] option')
+    variations = [{'variation': option.get('value'), 'price': option.get('data-price')}
+                  for option in size_elements if option.get('value')]
 
-    data = {'title': title, 'price': price, 'description': formatted_text, 'image_urls': ', '.join(image_urls), 'category': category}
+    print(title, price, formatted_text, ', '.join(image_urls), category, variations)
+
+    data = {'title': title, 'price': price, 'description': formatted_text, 'image_urls': ', '.join(image_urls),
+            'category': category, 'variations': ', '.join([f"{v['variation']}: {v['price']}" for v in variations])}
     write_data_csv(FILEPARAMS, data)
 
 
 def main():
-    order = ['title', 'price', 'description', 'image_urls', 'category']
+    order = ['title', 'price', 'description', 'image_urls', 'category', 'variations']
     create_csv(FILEPARAMS, order)
     with open('templates/../urls_csv/urls_folkbazar.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
