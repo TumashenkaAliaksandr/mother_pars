@@ -46,8 +46,8 @@ def get_data(url):
         lines.append(current_line)
     formatted_text = '\n'.join(lines)
 
-    image_elements = soup.select('div.product-single__photo img')
-    image_urls = ['http:' + img["src"].strip("[]'") for img in image_elements]
+    image_elements = soup.select('a.js-modal-open-product-modal.product__photo-wrapper-product-template')
+    image_urls = ['http:' + img["href"] for img in image_elements]
 
     size_elements = soup.select('select.product-single__option[name="size"] option')
     variations = [{'variation': option.get('value'), 'price': option.get('data-price')}
