@@ -25,8 +25,7 @@ def get_data(url):
     title = soup.find('h1', {'class': 'product-single__title'}).text.strip()
 
     price_element = soup.find('span', {'class': 'product-single__price'})
-    price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1,
-                  2) if price_element else 'N/A'
+    price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1, 2) if price_element else 'N/A'
 
     desc_container = soup.find('div', {'class': 'product-single__description'})
     desc = desc_container.text.strip() if desc_container else ''
@@ -60,6 +59,14 @@ def get_data(url):
     name_variations = [variation['name'] for variation in variations]
     values_variations = [', '.join(variation['values']) for variation in variations]
 
+    price_variations = []
+    for variation_option in variation_options:
+        if variation_option.get('value'):
+            variation_value = variation_option.text.strip()
+            price_element = variation_option.find_previous('span', {'class': 'product-single__price'})
+            variation_price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1, 2) if price_element else 'N/A'
+            price_variations.append(f'{variation_value}: {variation_price}')
+
     data = {
         'title': title,
         'price': price,
@@ -67,7 +74,8 @@ def get_data(url):
         'category': category,
         'image_urls': ', '.join(image_urls),
         'name_variations': ', '.join(name_variations),
-        'values_variations': ', '.join(values_variations)
+        'values_variations': ', '.join(values_variations),
+        'price_variations': ', '.join(price_variations)
     }
 
     write_data_csv(FILEPARAMS, data)
