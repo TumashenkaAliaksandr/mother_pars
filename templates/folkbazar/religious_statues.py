@@ -18,6 +18,12 @@ def write_data_csv(filename, data):
         csv.DictWriter(file, fieldnames=list(data)).writerow(data)
 
 
+def calculate_percentage(amounts):
+    total_amount = sum(amounts)
+    percentages = [(amount / total_amount) * 100 for amount in amounts]
+    return percentages
+
+
 def get_data(url):
     html = requests.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
@@ -60,12 +66,25 @@ def get_data(url):
     values_variations = [', '.join(variation['values']) for variation in variations]
 
     price_variations = []
-    for variation_option in variation_options:
+    percent_increase = 0.9  # Процент увеличения для каждой последующей вариации
+
+    for i, variation_option in enumerate(variation_options):
         if variation_option.get('value'):
             variation_value = variation_option.text.strip()
             price_element = variation_option.find_previous('span', {'class': 'product-single__price'})
-            variation_price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1, 2) if price_element else 'N/A'
-            price_variations.append(f'{variation_value}: {variation_price}')
+            variation_price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1,
+                                    2) if price_element else 'N/A'
+
+            if i == 2:  # Индекс третьей вариации
+                variation_price *= 0.7  # Увеличение на 0.7%
+
+            if i > 0:
+                previous_price = float(price_variations[i - 1])
+                variation_price += previous_price * percent_increase
+
+            price_variations.append(f'{variation_price:.2f}')
+
+    print(price_variations)
 
     data = {
         'title': title,
@@ -85,7 +104,7 @@ def main():
     order = ['title', 'price', 'description', 'category', 'image_urls', 'name_variations', 'values_variations',
              'price_variations']
     create_csv(FILEPARAMS, order)
-    with open('templates/../urls_pars/urls_csv/urls_folkbazar_religious_statues.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../urls_csv/urls_folkbazar_religious_statues.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
