@@ -85,7 +85,7 @@ def main():
     order = ['title', 'price', 'description', 'category', 'image_urls', 'name_variations', 'values_variations',
              'price_variations']
     create_csv(FILEPARAMS, order)
-    with open('templates/../urls_csv/urls_folkbazar_religious_statues.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../urls_pars/urls_csv/urls_folkbazar_religious_statues.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)

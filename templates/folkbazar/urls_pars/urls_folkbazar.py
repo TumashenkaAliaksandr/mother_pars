@@ -3,8 +3,8 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-directory = os.path.abspath('templates/../urls_csv')
-FILENAME = 'urls_folkbazar.csv'
+directory = os.path.abspath('templates/urls_csv')
+FILENAME = 'urls_folkbazar_religious_statues.csv'
 FILEPARAMS = os.path.join(directory, FILENAME)
 
 def create_csv(filename, fieldnames):
@@ -32,10 +32,12 @@ if response.status_code == 200:
 
     # Нахождение всех ссылок на товары
     product_links = set()
-    link_elements = soup.select('div.category-products a')
+    link_elements = soup.select('div.grid a')
     for link_element in link_elements:
         link = link_element.get("href")
-        product_links.add(link)
+        if link and '/collections/religious-statues/products/' in link:
+            added = "https://folkbazar.com" + link
+            product_links.add(added)
 
     # Поиск и обработка остальных страниц пагинации
     pagination = soup.find("div", {'class': 'pagination'})
@@ -51,7 +53,8 @@ if response.status_code == 200:
                     page_link_elements = page_soup.select('div.page a')
                     for page_link_element in page_link_elements:
                         page_link = page_link_element.get("href")
-                        product_links.add(page_link)
+                        if page_link and '/collections/religious-statues/products/' in page_link:
+                            product_links.add(page_link)
 
     # Запись ссылок на товары в файл
     fieldnames = ['url']
