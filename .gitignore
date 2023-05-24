@@ -139,4 +139,4 @@ GitHub.sublime-settings
 
 templates/rena/tab_rena.csv
 templates/rena/urls_rena.csv
-urls_csv/urls_solar.csv
+templates/solar/urls_csv/urls_solar.csv
