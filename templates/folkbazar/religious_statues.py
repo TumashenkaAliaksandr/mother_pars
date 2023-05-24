@@ -59,45 +59,38 @@ def get_data(url):
         variation_name = variation_element.find('label').text.strip()
         variation_options = variation_element.find_all('option')
         variation_values = [option.text.strip() for option in variation_options if option.get('value')]
-        variation_data = {'name': variation_name, 'values': variation_values}
-        variations.append(variation_data)
+        variation_prices = []
 
-    name_variations = [variation['name'] for variation in variations]
-    values_variations = [', '.join(variation['values']) for variation in variations]
+        percent_increase = 0.9  # Процент увеличения для каждой последующей вариации
 
-    price_variations = []
-    percent_increase = 0.9  # Процент увеличения для каждой последующей вариации
+        for i, variation_option in enumerate(variation_options):
+            if variation_option.get('value'):
+                variation_value = variation_option.text.strip()
+                price_element = variation_option.find_previous('span', {'class': 'product-single__price'})
+                variation_price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1,
+                                        2) if price_element else 'N/A'
 
-    for i, variation_option in enumerate(variation_options):
-        if variation_option.get('value'):
-            variation_value = variation_option.text.strip()
-            price_element = variation_option.find_previous('span', {'class': 'product-single__price'})
-            variation_price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1,
-                                    2) if price_element else 'N/A'
+                if i == 2:  # Индекс третьей вариации
+                    variation_price *= 0.7  # Увеличение на 0.7%
 
-            if i == 2:  # Индекс третьей вариации
-                variation_price *= 0.7  # Увеличение на 0.7%
+                if i > 0:
+                    previous_price = float(variation_prices[i - 1])
+                    variation_price += previous_price * percent_increase
 
-            if i > 0:
-                previous_price = float(price_variations[i - 1])
-                variation_price += previous_price * percent_increase
+                variation_prices.append(f'{variation_price:.2f}')
 
-            price_variations.append(f'{variation_price:.2f}')
-
-    print(price_variations)
-
-    data = {
-        'title': title,
-        'price': price,
-        'description': formatted_text,
-        'category': category,
-        'image_urls': ', '.join(image_urls),
-        'name_variations': ', '.join(name_variations),
-        'values_variations': ', '.join(values_variations),
-        'price_variations': ', '.join(price_variations)
-    }
-
-    write_data_csv(FILEPARAMS, data)
+        for value, price in zip(variation_values, variation_prices):
+            data = {
+                'title': title,
+                'price': price,
+                'description': formatted_text,
+                'category': category,
+                'image_urls': ', '.join(image_urls),
+                'name_variations': variation_name,
+                'values_variations': value,
+                'price_variations': price
+            }
+            write_data_csv(FILEPARAMS, data)
 
 
 def main():
