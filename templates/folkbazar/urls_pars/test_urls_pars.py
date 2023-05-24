@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-directory = os.path.abspath('templates/../urls_csv')
+directory = 'templates/../../urls_csv'
 FILENAME = 'test_urls_folkbazar.csv'
 FILEPARAMS = os.path.join(directory, FILENAME)
 

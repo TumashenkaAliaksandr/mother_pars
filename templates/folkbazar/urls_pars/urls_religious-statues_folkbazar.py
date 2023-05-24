@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-directory = os.path.abspath('templates/urls_csv')
+directory = 'templates/../../urls_csv'
 FILENAME = 'urls_folkbazar_religious_statues.csv'
 FILEPARAMS = os.path.join(directory, FILENAME)
 
@@ -16,10 +16,6 @@ def write_csv(filename, data, fieldnames):
     with open(filename, 'a', encoding='utf-8', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writerow(data)
-
-# Создание директории, если она не существует
-if not os.path.exists(directory):
-    os.makedirs(directory)
 
 # Отправка запроса на страницу категории
 url = "https://folkbazar.com/en-us/collections/religious-statues"
