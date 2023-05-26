@@ -3,7 +3,6 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-
 directory = 'templates/../done_csv'
 filename = 'bhumpas.csv'
 FILEPARAMS = os.path.join(directory, filename)
@@ -19,6 +18,12 @@ def write_data_csv(filename, data):
         csv.DictWriter(file, fieldnames=list(data)).writerow(data)
 
 
+def calculate_percentage(amounts):
+    total_amount = sum(amounts)
+    percentages = [(amount / total_amount) * 100 for amount in amounts]
+    return percentages
+
+
 def get_data(url):
     html = requests.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
@@ -26,8 +31,7 @@ def get_data(url):
     title = soup.find('h1', {'class': 'product-single__title'}).text.strip()
 
     price_element = soup.find('span', {'class': 'product-single__price'})
-    price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1,
-                  2) if price_element else 'N/A'
+    price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1, 2) if price_element else 'N/A'
 
     desc_container = soup.find('div', {'class': 'product-single__description'})
     desc = desc_container.text.strip() if desc_container else ''
@@ -49,19 +53,49 @@ def get_data(url):
     image_elements = soup.select('a.js-modal-open-product-modal.product__photo-wrapper-product-template')
     image_urls = ['http:' + img["href"] for img in image_elements]
 
-    size_elements = soup.select('select.product-single__option[name="size"] option')
-    variations = [{'variation': option.get('value'), 'price': option.get('data-price')}
-                  for option in size_elements if option.get('value')]
+    variations = []
+    variation_elements = soup.select('div.selector-wrapper.js.product-form__item')
+    for variation_element in variation_elements:
+        variation_name = variation_element.find('label').text.strip()
+        variation_options = variation_element.find_all('option')
+        variation_values = [option.text.strip() for option in variation_options if option.get('value')]
+        variation_prices = []
 
-    print(title, price, formatted_text, ', '.join(image_urls), category, variations)
+        percent_increase = 0.9  # Процент увеличения для каждой последующей вариации
 
-    data = {'title': title, 'price': price, 'description': formatted_text, 'image_urls': ', '.join(image_urls),
-            'category': category, 'variations': ', '.join([f"{v['variation']}: {v['price']}" for v in variations])}
-    write_data_csv(FILEPARAMS, data)
+        for i, variation_option in enumerate(variation_options):
+            if variation_option.get('value'):
+                variation_value = variation_option.text.strip()
+                price_element = variation_option.find_previous('span', {'class': 'product-single__price'})
+                variation_price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1,
+                                        2) if price_element else 'N/A'
+
+                if i == 2:  # Индекс третьей вариации
+                    variation_price *= 0.7  # Увеличение на 0.7%
+
+                if i > 0:
+                    previous_price = float(variation_prices[i - 1])
+                    variation_price += previous_price * percent_increase
+
+                variation_prices.append(f'{variation_price:.2f}')
+
+        for value, price in zip(variation_values, variation_prices):
+            data = {
+                'title': title,
+                'price': price,
+                'description': formatted_text,
+                'category': category,
+                'image_urls': ', '.join(image_urls),
+                'name_variations': variation_name,
+                'values_variations': value,
+                'price_variations': price
+            }
+            write_data_csv(FILEPARAMS, data)
 
 
 def main():
-    order = ['title', 'price', 'description', 'image_urls', 'category', 'variations']
+    order = ['title', 'price', 'description', 'category', 'image_urls', 'name_variations', 'values_variations',
+             'price_variations']
     create_csv(FILEPARAMS, order)
     with open('templates/../urls_csv/urls_folkbazar_bhumpas.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
