@@ -62,13 +62,13 @@ def get_data(url):
         variation_values = [option.text.strip() for option in variation_options if option.get('value')]
         variation_prices = []
 
-        percent_increase = 0.9  # Процент увеличения для каждой последующей вариации
+        percent_increase = 0.7  # Процент увеличения для каждой последующей вариации
 
         for i, variation_option in enumerate(variation_options):
             if variation_option.get('value'):
                 variation_value = variation_option.text.strip()
                 price_element = variation_option.find_previous('span', {'class': 'product-single__price'})
-                variation_price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1,
+                variation_price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1,
                                         2) if price_element else 'N/A'
 
                 if i == 2:  # Index of the third variation
