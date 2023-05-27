@@ -2,6 +2,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import csv
+import hashlib
 
 directory = 'templates/../done_csv'
 filename = 'bhumpas.csv'
@@ -10,7 +11,7 @@ FILEPARAMS = os.path.join(directory, filename)
 
 def create_csv(filename, order):
     with open(filename, 'w', encoding='utf-8', newline='') as file:
-        csv.DictWriter(file, fieldnames=order).writeheader()
+        csv.writer(file).writerow(order)
 
 
 def write_data_csv(filename, data):
@@ -70,8 +71,8 @@ def get_data(url):
                 variation_price = round(float(price_element.text.replace('Rs.', '').replace(',', '').strip()) * 1.1,
                                         2) if price_element else 'N/A'
 
-                if i == 2:  # Индекс третьей вариации
-                    variation_price *= 0.7  # Увеличение на 0.7%
+                if i == 2:  # Index of the third variation
+                    variation_price *= 0.7  # 0.7% decrease for the third variation
 
                 if i > 0:
                     previous_price = float(variation_prices[i - 1])
@@ -80,8 +81,12 @@ def get_data(url):
                 variation_prices.append(f'{variation_price:.2f}')
 
         for value, price in zip(variation_values, variation_prices):
+            # Generate a unique hash for the identifier
+            identifier = hashlib.sha256(url.encode('utf-8')).hexdigest()
+
             data = {
-                'title': title,
+                'title': identifier,
+                'id': title,
                 'price': price,
                 'description': formatted_text,
                 'category': category,
@@ -92,16 +97,14 @@ def get_data(url):
             }
             write_data_csv(FILEPARAMS, data)
 
-
 def main():
-    order = ['title', 'price', 'description', 'category', 'image_urls', 'name_variations', 'values_variations',
-             'price_variations']
+    order = ['id', 'title', 'price', 'description', 'category', 'image_urls', 'name_variations',
+             'values_variations']
     create_csv(FILEPARAMS, order)
     with open('templates/../urls_csv/urls_folkbazar_bhumpas.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
-
 
 if __name__ == '__main__':
     main()
