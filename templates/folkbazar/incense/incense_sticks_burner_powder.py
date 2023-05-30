@@ -5,7 +5,7 @@ import csv
 import hashlib
 
 directory = 'templates/../../done_csv'
-filename = 'radung_gyaling.csv'
+filename = 'incense_sticks_burner_powder.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 
@@ -23,12 +23,13 @@ def get_data(url):
     html = requests.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
 
-    title = soup.find('h1', {'class': 'product-single__title'}).text.strip()
+    title_element = soup.find('h1', {'class': 'product-single__title'})
+    title = title_element.text.strip() if title_element and title_element.text.strip() != 'Default Title' else ''
 
     desc_container = soup.find('div', {'class': 'product-single__description'})
     desc = desc_container.text.strip() if desc_container else ''
 
-    category = 'Radung & Gyaling'
+    category = 'Incense Sticks'
 
     lines = []
     current_line = ''
@@ -51,17 +52,13 @@ def get_data(url):
     for i, variation_element in enumerate(variation_elements):
         variation_title = ''
         if i < len(variation_titles):
-            variation_title_element = variation_titles[i].find('label').text.strip()
+            variation_title_element = variation_titles[i].find('label')
             if variation_title_element:
-                variation_title = variation_title_element
+                variation_title = variation_title_element.text.strip()
 
         variation_name = re.sub(r'Rs[.,0-9\s]*|[^a-zA-Z0-9\s]', '', variation_element.text.strip())
         variation_value = variation_element['value']
         variation_price = re.sub(r'[^0-9.]', '', variation_element.text.replace('Rs.', '').replace(',', '').strip())
-
-        # Assign variation_name to name_variations if variation_title is empty
-        if not variation_title:
-            variation_title = variation_name
 
         # Generate a unique hash for the identifier
         identifier = hashlib.sha256(url.encode('utf-8')).hexdigest()
@@ -85,7 +82,7 @@ def main():
     order = ['identifier', 'title', 'price', 'description', 'category', 'image_urls', 'variation_titles', 'name_variations',
              'variations_price', 'id']
     create_csv(FILEPARAMS, order)
-    with open('templates/../../urls_csv/urls_folkbazar_radung_gyaling.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../../urls_csv/urls_folkbazar_incense_sticks_burner_powder.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
