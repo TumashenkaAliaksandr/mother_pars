@@ -29,7 +29,7 @@ def get_data(url):
     desc_container = soup.find('div', {'class': 'product-single__description'})
     desc = desc_container.text.strip() if desc_container else ''
 
-    category = 'Incense Sticks'
+    category = 'Statues'
 
     lines = []
     current_line = ''
