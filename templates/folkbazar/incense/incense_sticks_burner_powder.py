@@ -5,7 +5,7 @@ import csv
 import hashlib
 
 directory = 'templates/../../done_csv'
-filename = 'incense_sticks_burner_powder.csv'
+filename = 'no_var_incense_sticks_burner_powder.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 
@@ -58,7 +58,7 @@ def get_data(url):
 
         variation_name = re.sub(r'Rs[.,0-9\s]*|[^a-zA-Z0-9\s]', '', variation_element.text.strip())
         variation_value = variation_element['value']
-        variation_price = re.sub(r'[^0-9.]', '', variation_element.text.replace('Rs.', '').replace(',', '').strip())
+        variation_price = variation_element.text.replace('Rs.', '').strip()
 
         # Generate a unique hash for the identifier
         identifier = hashlib.sha256(url.encode('utf-8')).hexdigest()
@@ -82,7 +82,7 @@ def main():
     order = ['identifier', 'title', 'price', 'description', 'category', 'image_urls', 'variation_titles', 'name_variations',
              'variations_price', 'id']
     create_csv(FILEPARAMS, order)
-    with open('templates/../../urls_csv/urls_folkbazar_incense_sticks_burner_powder.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../../urls_csv/urls_folkbazar_novariations.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)

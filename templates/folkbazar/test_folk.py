@@ -23,12 +23,13 @@ def get_data(url):
     html = requests.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
 
-    title = soup.find('h1', {'class': 'product-single__title'}).text.strip()
+    title_element = soup.find('h1', {'class': 'product-single__title'})
+    title = title_element.text.strip() if title_element and title_element.text.strip() != 'Default Title' else ''
 
     desc_container = soup.find('div', {'class': 'product-single__description'})
     desc = desc_container.text.strip() if desc_container else ''
 
-    category = 'Radung & Gyaling'
+    category = 'Incense Sticks'
 
     lines = []
     current_line = ''
@@ -48,7 +49,10 @@ def get_data(url):
     variation_elements = soup.select('select#ProductSelect-product-template option')
     variation_titles = soup.select('div.selector-wrapper.js.product-form__item')
 
+    has_variation = len(variation_elements) > 1
+
     for i, variation_element in enumerate(variation_elements):
+        variation_title = ''
         if i < len(variation_titles):
             variation_title_element = variation_titles[i].find('label')
             if variation_title_element:
@@ -63,15 +67,15 @@ def get_data(url):
 
         data = {
             'identifier': identifier,
-            'title': title,
+            'title': title if not has_variation else '',
             'price': variation_price,
             'description': formatted_text,
             'category': category,
             'image_urls': ', '.join(image_urls),
-            'variation_titles': variation_title,
-            'name_variations': variation_name,
-            'variations_price': variation_price,
-            'id': variation_value
+            'variation_titles': variation_title if has_variation else '',
+            'name_variations': variation_name if has_variation else '',
+            'variations_price': variation_price if has_variation else '',
+            'id': variation_value if has_variation else ''
         }
         write_data_csv(FILEPARAMS, data)
 
