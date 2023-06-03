@@ -75,8 +75,8 @@ def get_data(url):
             'id': variation_value
         }
 
-        # Исключаем товары с пометкой "Sold Out"
-        if "Sold Out" not in variation_name:
+        # Исключаем товары с пометкой "Sold Out" или содержащие "incense"
+        if "Sold Out" not in variation_name and "incense" not in variation_name:
             write_data_csv(FILEPARAMS, data)
 
 
