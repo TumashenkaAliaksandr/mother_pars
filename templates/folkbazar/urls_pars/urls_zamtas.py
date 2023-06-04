@@ -18,8 +18,8 @@ def write_csv(filename, data, fieldnames):
         writer.writerow(data)
 
 # Отправка запроса на страницу категории
-url = "https://folkbazar.com/en-us/collections/zamtas"
-response = requests.get(url)
+base_url = "https://folkbazar.com/en-us/collections/zamtas?page="
+response = requests.get(base_url)
 
 # Проверка успешности запроса
 if response.status_code == 200:
@@ -36,21 +36,21 @@ if response.status_code == 200:
             product_links.add(added)
 
     # Поиск и обработка остальных страниц пагинации
-    pagination = soup.find("div", {'class': 'pagination'})
+    pagination = soup.find("div", class_='pagination')
     if pagination is not None:
-        pages = pagination.find_all("li")
+        pages = pagination.find_all("a")
         for page in pages:
-            page_link = page.find("a")
-            if page_link is not None:
-                page_url = page_link["href"]
+            page_link = page.get("href")
+            if page_link and '/collections/zamtas?page=' in page_link:
+                page_url = "https://folkbazar.com" + page_link
                 page_response = requests.get(page_url)
                 if page_response.status_code == 200:
                     page_soup = BeautifulSoup(page_response.content, "html.parser")
-                    page_link_elements = page_soup.select('div.page a')
+                    page_link_elements = page_soup.select('div.grid a')
                     for page_link_element in page_link_elements:
                         page_link = page_link_element.get("href")
-                        if page_link and ('/collections/zamtas/products/' in page_link and 'incense' not in page_link):
-                            product_links.add(page_link)
+                        if page_link and '/collections/zamtas/products/' in page_link and 'incense' not in page_link:
+                            product_links.add("https://folkbazar.com" + page_link)
 
     # Запись ссылок на товары в файл
     fieldnames = ['url']

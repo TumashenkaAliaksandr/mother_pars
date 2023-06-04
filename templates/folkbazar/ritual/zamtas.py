@@ -4,10 +4,9 @@ from bs4 import BeautifulSoup
 import csv
 import hashlib
 
-directory = 'templates/../done_csv'
+directory = 'templates/../../done_csv'
 filename = 'zamtas.csv'
 FILEPARAMS = os.path.join(directory, filename)
-
 
 def create_csv(filename, order):
     with open(filename, 'w', encoding='utf-8', newline='') as file:
@@ -23,7 +22,8 @@ def get_data(url):
     html = requests.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
 
-    title = soup.find('h1', {'class': 'product-single__title'}).text.strip()
+    title_element = soup.find('h1', {'class': 'product-single__title'})
+    title = title_element.text.strip() if title_element and title_element.text.strip() != 'Default Title' else ''
 
     desc_container = soup.find('div', {'class': 'product-single__description'})
     desc = desc_container.text.strip() if desc_container else ''
@@ -49,14 +49,15 @@ def get_data(url):
     variation_titles = soup.select('div.selector-wrapper.js.product-form__item')
 
     for i, variation_element in enumerate(variation_elements):
+        variation_title = ''
         if i < len(variation_titles):
-            variation_title = variation_titles[i].find('label').text.strip()
-        else:
-            variation_title = ''
+            variation_title_element = variation_titles[i].find('label')
+            if variation_title_element:
+                variation_title = variation_title_element.text.strip()
 
-        variation_name = re.sub(r'[^a-zA-Z\s]', '', variation_element.text.replace('Rs.', '').replace(',', '').strip())
+        variation_name = re.sub(r'Rs[.,0-9\s]*|[^a-zA-Z0-9\s]', '', variation_element.text.strip())
         variation_value = variation_element['value']
-        variation_price = re.sub(r'[^0-9.]', '', variation_element.text.replace('Rs.', '').replace(',', '').strip())
+        variation_price = variation_element.text.replace('Rs.', '').strip()
 
         # Generate a unique hash for the identifier
         identifier = hashlib.sha256(url.encode('utf-8')).hexdigest()
@@ -73,14 +74,17 @@ def get_data(url):
             'variations_price': variation_price,
             'id': variation_value
         }
-        write_data_csv(FILEPARAMS, data)
+
+        # Исключаем товары с пометкой "Sold Out" или содержащие "incense" и "Default Title"
+        if "Sold Out" not in variation_name and "incense" and "Default Title" not in variation_name:
+            write_data_csv(FILEPARAMS, data)
 
 
 def main():
     order = ['identifier', 'title', 'price', 'description', 'category', 'image_urls', 'variation_titles', 'name_variations',
              'variations_price', 'id']
     create_csv(FILEPARAMS, order)
-    with open('templates/../urls_csv/urls_folkbazar_zamtas.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../../urls_csv/urls_folkbazar_zamtas.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
