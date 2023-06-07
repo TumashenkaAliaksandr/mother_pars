@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import hashlib
+from urllib.parse import urlparse, parse_qs
 
 directory = 'templates/../../done_csv'
 filename = 't_shirts.csv'
@@ -18,17 +19,24 @@ def write_data_csv(filename, data):
         csv.DictWriter(file, fieldnames=list(data)).writerow(data)
 
 def get_data(url):
+    parsed_url = urlparse(url)
+    query_params = parse_qs(parsed_url.query)
+    variant_id = query_params.get('variant', [''])[0]
+    print(variant_id)
+
     html = requests.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
 
-    title_element = soup.find('h1', {'class': 'md'})
+    title_element = soup.find('h1', {'class': 'capitalize'})
     title = title_element.text.strip() if title_element and title_element.text.strip() != 'Default Title' else ''
     print(title)
 
-    desc_container = soup.find('div', {'class': 'product-single__description'})
+    desc_container = soup.find('details', {'class': 'filter-group'})
     desc = desc_container.text.strip() if desc_container else ''
+    print(desc)
 
     category = 'T-shirts'
+    variation_titles = 'Select Size'
 
     lines = []
     current_line = ''
@@ -42,12 +50,24 @@ def get_data(url):
         lines.append(current_line)
     formatted_text = '\n'.join(lines)
 
-    image_elements = soup.select('div.product__photo-wrapper-product-template a.js-modal-open-product-modal')
-    image_urls = ['https:' + img["href"] for img in image_elements]
+    variation_elements = soup.select('select.single-option-selector option')
+    size_element = soup.find('span', class_='capitalize text-base md:text-xl text-[#1a1e31] font-[familySemiBold]')
+    size_title = size_element.text.strip() if size_element else ''
+    print(size_title)
+    color_element = soup.find('span', class_='capitalize text-base md:text-xl text-[#1a1e31] font-[familySemiBold]',
+                              string='Select Color')
+    color_value = ''
+    if color_element:
+        color_value_element = color_element.find('span', id='selected-color-title')
+        color_value = color_value_element.text.strip() if color_value_element else ''
+    print(color_value)
 
-    variation_elements = soup.select('select#ProductSelect-product-template option')
-    variation_titles = soup.select('div.selector-wrapper.js.product-form__item')
+    cost = soup.find('variant-price', {'class': 'justify-between'})
+    size_element = soup.find('input', {'class': 'size-select-input'})
+    size = size_element['value']
+    print(size, cost, color_value, variation_elements)
 
+    variations = []
     for i, variation_element in enumerate(variation_elements):
         variation_title = ''
         if i < len(variation_titles):
@@ -59,30 +79,41 @@ def get_data(url):
         variation_value = variation_element['value']
         variation_price = variation_element.text.replace('Rs.', '').strip()
 
-        # Generate a unique hash for the identifier
-        identifier = hashlib.sha256(url.encode('utf-8')).hexdigest()
+        variations.append({
+            'title': variation_title,
+            'name': variation_name,
+            'value': variation_value,
+            'price': variation_price
+        })
+
+    image_elements = soup.select('img.image-placeholder-bg')
+    image_urls = ['http:' + img['src'] for img in image_elements]
+    print(image_urls)
+
+    for variation in variations:
 
         data = {
-            'identifier': identifier,
             'title': title,
-            'price': variation_price,
+            'price': variation['price'],
             'description': formatted_text,
             'category': category,
             'image_urls': ', '.join(image_urls),
-            'variation_titles': variation_title,
-            'name_variations': variation_name,
-            'variations_price': variation_price,
-            'id': variation_value
+            'variation_titles': variation['title'],
+            'name_variations': variation['name'],
+            'variations_price': variation['price'],
+            'id': variation['value'],
+            'variant_id': variant_id
         }
 
-        # Исключаем товары с пометкой "Sold Out" или содержащие "incense" и "Default Title"
-        if "Sold Out" not in variation_name and "incense" and "Default Title" not in variation_name:
-            write_data_csv(FILEPARAMS, data)
+        write_data_csv(FILEPARAMS, data)
+
+    url = "https://nobero.com/products/wander-soul-4?variant=43975628357798"
+
 
 
 def main():
-    order = ['identifier', 'title', 'price', 'description', 'category', 'image_urls', 'variation_titles', 'name_variations',
-             'variations_price', 'id']
+    order = ['title', 'price', 'description', 'category', 'image_urls', 'variation_titles', 'name_variations',
+             'variations_price', 'id', 'variant_id']  # Добавляем 'variant_id' в порядок полей
     create_csv(FILEPARAMS, order)
     with open('templates/../../urls_csv/test_pick_printed_t_shirts.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):

@@ -1,1 +1,1 @@
-identifier,title,price,description,category,image_urls,variation_titles,name_variations,variations_price,id
+title,price,description,category,image_urls,variation_titles,name_variations,variations_price,id,variant_id
