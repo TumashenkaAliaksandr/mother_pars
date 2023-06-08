@@ -62,10 +62,11 @@ def get_data(url):
         color_value = color_value_element.text.strip() if color_value_element else ''
     print(color_value)
 
-    cost = soup.find('variant-price', {'class': 'justify-between'})
+    price_element = soup.find('h2', {'id': 'variant-price'})
+    price = price_element.text.replace('₹', '').strip()
     size_element = soup.find('input', {'class': 'size-select-input'})
     size = size_element['value']
-    print(size, cost, color_value, variation_elements)
+    print(size, price, color_value, variation_elements)
 
     variations = []
     for i, variation_element in enumerate(variation_elements):
