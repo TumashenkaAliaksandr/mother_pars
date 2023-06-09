@@ -51,14 +51,15 @@ def get_data(url):
     best_image_url = image_urls[0] if image_urls else ''
     print('Image: ', best_image_url)
 
-    size_element = soup.find('span', class_='capitalize text-base md:text-xl text-[#1a1e31] font-[familySemiBold]')
-    size_title = size_element.text.strip() if size_element else ''
-    print('Size Title: ', size_title)
+    size_title = "Select Size"
+    print('size_title:', size_title)
 
     label_elements = soup.select('label[for^="size-"]')
     formatted_labels = [label.text.strip() for label in label_elements]
-    labels = ' '.join(formatted_labels)   # \n
-    print('Size: ', labels)
+    labels = ' '.join(formatted_labels)
+
+    color_title = "Select Color"
+    print('Title color: ', color_title)
 
     id_prod = soup.select('input[form]')
     for form_element in id_prod:
@@ -71,12 +72,14 @@ def get_data(url):
         select_color = div_element.text.strip().replace('Size', 'Color')
         print('Title color: ', select_color)
 
-
-    color_var = soup.find('input', class_='color-select-input', attrs={'name': 'color'})
-    if color_var:
+    color_vars = soup.find_all('input', class_='color-select-input', attrs={'name': 'color'})
+    values = []
+    for color_var in color_vars:
         value = color_var.get('value')
-        print('Color: ', value)
+        values.append(value)
+        values_str = ', '.join(values)
 
+    print('Color:', values_str)
 
     data = {
         'title': title,
@@ -86,8 +89,8 @@ def get_data(url):
         'image_urls': ', '.join(image_urls),
         'size_title': size_title,
         'size': labels,
-        'color_title': select_color,
-        'color_value': value,
+        'color_title': color_title,
+        'color_value': values_str,
         'id': numeric_form_id,
     }
     write_data_csv(FILEPARAMS, data)
