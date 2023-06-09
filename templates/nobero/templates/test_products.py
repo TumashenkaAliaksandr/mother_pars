@@ -3,9 +3,9 @@ import re
 import requests
 from bs4 import BeautifulSoup
 import csv
-from urllib.parse import urlparse, parse_qs
+import hashlib
 
-directory = 'templates/../../done_csv'
+directory = 'templates/../../../done_csv'
 filename = 't_shirts.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
@@ -18,25 +18,21 @@ def write_data_csv(filename, data):
         csv.DictWriter(file, fieldnames=list(data)).writerow(data)
 
 def get_data(url):
-    parsed_url = urlparse(url)
-    query_params = parse_qs(parsed_url.query)
-    variant_id = query_params.get('variant', [''])[0]
-    print(variant_id)
-
     html = requests.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
 
+    category = 'T-shirts'
+    print('Category: ', category)
     title_element = soup.find('h1', {'class': 'capitalize'})
     title = title_element.text.strip() if title_element and title_element.text.strip() != 'Default Title' else ''
+    print('Title: ', title)
     price_element = soup.find('h2', {'id': 'variant-price'})
     price = price_element.text.replace('₹', '').strip()
-    print(title, price)
+    print('Price: ', price)
 
     desc_container = soup.find('details', {'class': 'filter-group'})
     desc = desc_container.text.strip() if desc_container else ''
-    print(desc)
-
-    category = 'T-shirts'
+    print('Description:', '\n', desc)
 
     lines = []
     current_line = ''
@@ -50,74 +46,58 @@ def get_data(url):
         lines.append(current_line)
     formatted_text = '\n'.join(lines)
 
-    variation_elements = soup.select('select.single-option-selector option')
-    size_element = soup.find('span', class_='md:text-xl')
+    image_elements = soup.select('img.image-placeholder-bg')
+    image_urls = ['https:' + img["src"] for img in image_elements]
+    best_image_url = image_urls[0] if image_urls else ''
+    print('Image: ', best_image_url)
+
+    size_element = soup.find('span', class_='capitalize text-base md:text-xl text-[#1a1e31] font-[familySemiBold]')
     size_title = size_element.text.strip() if size_element else ''
-    print(size_title)
+    print('Size Title: ', size_title)
 
-    select_color_element = soup.find('div', class_='capitalize pb-4 flex justify-between items-center')
-    sel_color = select_color_element.next_sibling.text.strip() if select_color_element else ''
-    print(sel_color)
+    label_elements = soup.select('label[for^="size-"]')
+    formatted_labels = [label.text.strip() for label in label_elements]
+    labels = ' '.join(formatted_labels)   # \n
+    print('Size: ', labels)
 
-    selected_color_element = soup.find('span', {'id': 'selected-color-title'})
-    sel_color_el = selected_color_element.text.strip() if selected_color_element else ''
+    id_prod = soup.select('input[form]')
+    for form_element in id_prod:
+        form_id = form_element['form']
+        numeric_form_id = re.sub('[^0-9]', '', form_id)
+        print(numeric_form_id)
 
-    if selected_color_element:
-        sel_color = selected_color_element.text.strip()
-    else:
-        sel_color = ''
+    color_element = soup.find('span', class_='capitalize text-base md:text-xl text-[#1a1e31] font-[familySemiBold]')
+    if color_element:
+        title_color = color_element.get_text(strip=True)
+        print(title_color)
 
-    size_element = soup.find('input', {'class': 'size-select-input'})
-    vari = size_element['value']
-    print(vari, sel_color_el, variation_elements)
+    color_var = soup.find('input', class_='color-select-input', attrs={'name': 'color'})
+    if color_var:
+        value = color_var.get('value')
+        print(value)
 
-    variations = []
-    for i, variation_element in enumerate(variation_elements):
-        variation_title = ''
-        if i < len(variation_elements):
-            variation_title_element = variation_elements[i].find('label')
-            if variation_title_element:
-                variation_title = variation_title_element.text.strip()
+    data = {
+        'title': title,
+        'price': price,
+        'description': formatted_text,
+        'category': category,
+        'image_urls': ', '.join(image_urls),
+        'size_title': size_title,
+        'size': labels,
+        'color_value': value,
+        'id': numeric_form_id,
+    }
+    write_data_csv(FILEPARAMS, data)
 
-        variation_name = re.sub(r'Rs[.,0-9\s]*|[^a-zA-Z0-9\s]', '', variation_element.text.strip())
-        variation_value = variation_element['value']
-        variation_price = variation_element.text.replace('Rs.', '').strip()
 
-        variations.append({
-            'title': variation_title,
-            'name': variation_name,
-            'value': variation_value,
-            'price': variation_price
-        })
+def main():
+    order = ['title', 'price', 'description', 'category', 'image_urls', 'size_title', 'size', 'color_value', 'id']
+    create_csv(FILEPARAMS, order)
+    with open('templates/../../../urls_csv/pick_printed_t_shirts.csv', 'r', encoding='utf-8') as file:
+        for line in csv.DictReader(file):
+            url = line['url']
+            get_data(url)
 
-        image_elements = soup.select('img.image-placeholder-bg')
-        image_urls = ['http:' + img['src'] for img in image_elements]
-        print(image_urls, variations)
 
-        for variation in variations:
-            data = {
-                'title': title,
-                'price': variation['price'],
-                'description': formatted_text,
-                'category': category,
-                'image_urls': ', '.join(image_urls),
-                'variation_titles': variation['title'],
-                'name_variations': variation['name'],
-                'variations_price': variation['price'],
-                'id': variation['value'],
-                'variant_id': variant_id
-            }
-
-            write_data_csv(FILEPARAMS, data)
-
-    def main():
-        order = ['title', 'price', 'description', 'category', 'image_urls', 'variation_titles', 'name_variations',
-                 'variations_price', 'id', 'variant_id']  # Добавляем 'variant_id' в порядок полей
-        create_csv(FILEPARAMS, order)
-        with open('templates/../../urls_csv/test_pick_printed_t_shirts.csv', 'r', encoding='utf-8') as file:
-            for line in csv.DictReader(file):
-                url = line['url']
-                get_data(url)
-
-    if __name__ == '__main__':
-        main()
+if __name__ == '__main__':
+    main()

@@ -64,17 +64,19 @@ def get_data(url):
     for form_element in id_prod:
         form_id = form_element['form']
         numeric_form_id = re.sub('[^0-9]', '', form_id)
-        print(numeric_form_id)
+        print('Id: ', numeric_form_id)
 
-    color_element = soup.find('span', class_='capitalize text-base md:text-xl text-[#1a1e31] font-[familySemiBold]')
-    if color_element:
-        title_color = color_element.get_text(strip=True)
-        print(title_color)
+    div_element = soup.find('div', class_='capitalize pb-4 flex justify-between items-center')
+    if div_element:
+        select_color = div_element.text.strip().replace('Size', 'Color')
+        print('Title color: ', select_color)
+
 
     color_var = soup.find('input', class_='color-select-input', attrs={'name': 'color'})
     if color_var:
         value = color_var.get('value')
-        print(value)
+        print('Color: ', value)
+
 
     data = {
         'title': title,
@@ -84,6 +86,7 @@ def get_data(url):
         'image_urls': ', '.join(image_urls),
         'size_title': size_title,
         'size': labels,
+        'color_title': select_color,
         'color_value': value,
         'id': numeric_form_id,
     }
@@ -91,7 +94,7 @@ def get_data(url):
 
 
 def main():
-    order = ['title', 'price', 'description', 'category', 'image_urls', 'size_title', 'size', 'color_value', 'id']
+    order = ['title', 'price', 'description', 'category', 'image_urls', 'size_title', 'size', 'color_title', 'color_value', 'id']
     create_csv(FILEPARAMS, order)
     with open('templates/../../../urls_csv/pick_printed_t_shirts.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
