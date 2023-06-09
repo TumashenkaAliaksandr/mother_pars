@@ -51,6 +51,15 @@ def get_data(url):
     best_image_url = image_urls[0] if image_urls else ''
     print('Image: ', best_image_url)
 
+    size_element = soup.find('span', class_='capitalize text-base md:text-xl text-[#1a1e31] font-[familySemiBold]')
+    size_title = size_element.text.strip() if size_element else ''
+    print('Size Title: ', size_title)
+
+    label_elements = soup.select('label[for^="size-"]')
+    formatted_labels = [label.text.strip() for label in label_elements]
+    labels = ' '.join(formatted_labels)   # \n
+    print('labels: ', labels)
+
 
     data = {
         'title': title,
@@ -58,12 +67,13 @@ def get_data(url):
         'description': formatted_text,
         'category': category,
         'image_urls': ', '.join(image_urls),
+        'labels': labels,
     }
     write_data_csv(FILEPARAMS, data)
 
 
 def main():
-    order = ['title', 'price', 'description', 'category', 'image_urls']
+    order = ['title', 'price', 'description', 'category', 'image_urls', 'labels']
     create_csv(FILEPARAMS, order)
     with open('templates/../../../urls_csv/pick_printed_t_shirts.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):

@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import csv
 import hashlib
 
-directory = '/../done_csv'
+directory = 'templates/../done_csv'
 filename = 't_shirts.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
