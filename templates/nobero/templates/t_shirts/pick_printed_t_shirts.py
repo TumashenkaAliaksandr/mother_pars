@@ -51,21 +51,24 @@ def get_data(url):
     best_image_url = image_urls[0] if image_urls else ''
     print('Image: ', best_image_url)
 
+    match = re.search(r'v=(\d+)', best_image_url)
+    if match:
+        id = match.group(1)
+        print("ID:", id)
+
     size_title = "Select Size"
     print('size_title:', size_title)
 
     label_elements = soup.select('label[for^="size-"]')
-    formatted_labels = [label.text.strip() for label in label_elements]
+    formatted_labels = [label.text.strip() for label in label_elements ]
     labels = ' '.join(formatted_labels)
+
 
     color_title = "Select Color"
     print('Title color: ', color_title)
-
-    id_prod = soup.select('input[form]')
-    for form_element in id_prod:
-        form_id = form_element['form']
-        numeric_form_id = re.sub('[^0-9]', '', form_id)
-        print('Id: ', numeric_form_id)
+    #
+    # product_id = url.rsplit('/', 1)[-1]
+    # print("Product ID:", product_id)
 
     div_element = soup.find('div', class_='capitalize pb-4 flex justify-between items-center')
     if div_element:
@@ -91,7 +94,7 @@ def get_data(url):
         'size': labels,
         'color_title': color_title,
         'color_value': values_str,
-        'id': numeric_form_id,
+        'id': id,
     }
     write_data_csv(FILEPARAMS, data)
 
