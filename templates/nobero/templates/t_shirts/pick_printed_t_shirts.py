@@ -58,8 +58,23 @@ def get_data(url):
     label_elements = soup.select('label[for^="size-"]')
     formatted_labels = [label.text.strip() for label in label_elements]
     labels = ' '.join(formatted_labels)   # \n
-    print('labels: ', labels)
+    print('Size: ', labels)
 
+    id_prod = soup.select('input[form]')
+    for form_element in id_prod:
+        form_id = form_element['form']
+        numeric_form_id = re.sub('[^0-9]', '', form_id)
+        print(numeric_form_id)
+
+    color_element = soup.find('span', class_='capitalize text-base md:text-xl text-[#1a1e31] font-[familySemiBold]')
+    if color_element:
+        title_color = color_element.get_text(strip=True)
+        print(title_color)
+
+    color_var = soup.find('input', class_='color-select-input', attrs={'name': 'color'})
+    if color_var:
+        value = color_var.get('value')
+        print(value)
 
     data = {
         'title': title,
@@ -67,13 +82,16 @@ def get_data(url):
         'description': formatted_text,
         'category': category,
         'image_urls': ', '.join(image_urls),
-        'labels': labels,
+        'size_title': size_title,
+        'size': labels,
+        'color_value': value,
+        'id': numeric_form_id,
     }
     write_data_csv(FILEPARAMS, data)
 
 
 def main():
-    order = ['title', 'price', 'description', 'category', 'image_urls', 'labels']
+    order = ['title', 'price', 'description', 'category', 'image_urls', 'size_title', 'size', 'color_value', 'id']
     create_csv(FILEPARAMS, order)
     with open('templates/../../../urls_csv/pick_printed_t_shirts.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
