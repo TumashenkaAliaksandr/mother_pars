@@ -47,9 +47,10 @@ def get_data(url):
     formatted_text = '\n'.join(lines)
 
     image_elements = soup.select('img.image-placeholder-bg')
-    image_urls = ['https:' + img["src"] for img in image_elements]
-    best_image_url = image_urls[0] if image_urls else ''
-    print('Image: ', best_image_url)
+    best_image_url = ''
+    if image_elements:
+        best_image_url = 'https:' + image_elements[0]['src']
+    print('Image:', best_image_url)
 
     match = re.search(r'v=(\d+)', best_image_url)
     if match:
@@ -89,7 +90,7 @@ def get_data(url):
         'price': price,
         'description': formatted_text,
         'category': category,
-        'image_urls': ', '.join(image_urls),
+        'image_urls': best_image_url,
         'size_title': size_title,
         'size': labels,
         'color_title': color_title,
