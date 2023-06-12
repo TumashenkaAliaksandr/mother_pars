@@ -47,12 +47,15 @@ def get_data(url):
     formatted_text = '\n'.join(lines)
 
     image_elements = soup.select('img.image-placeholder-bg')
-    best_image_url = ''
-    if image_elements:
-        best_image_url = 'https:' + image_elements[0]['src']
-    print('Image:', best_image_url)
+    image_urls = set()  # Set to store unique image URLs
+    for img in image_elements:
+        image_url = 'https:' + img['src']
+        image_width = int(img['width']) if 'width' in img.attrs else 0
+        if image_width != 75:  # Exclude images with width=75
+            image_urls.add(image_url)
+    print('Images:', image_urls)
 
-    match = re.search(r'v=(\d+)', best_image_url)
+    match = re.search(r'v=(\d+)', list(image_urls)[0])
     if match:
         id = match.group(1)
         print("ID:", id)
@@ -61,27 +64,24 @@ def get_data(url):
     print('size_title:', size_title)
 
     label_elements = soup.select('label[for^="size-"]')
-    formatted_labels = [label.text.strip() for label in label_elements ]
-    labels = ' '.join(formatted_labels)
+    formatted_labels = [label.text.strip() for label in label_elements if label.text.strip()]
+    labels = '|'.join(formatted_labels)
 
 
     color_title = "Select Color"
     print('Title color: ', color_title)
-    #
-    # product_id = url.rsplit('/', 1)[-1]
-    # print("Product ID:", product_id)
 
-    div_element = soup.find('div', class_='capitalize pb-4 flex justify-between items-center')
-    if div_element:
-        select_color = div_element.text.strip().replace('Size', 'Color')
-        print('Title color: ', select_color)
+    # div_element = soup.find('div', class_='capitalize pb-4 flex justify-between items-center')
+    # if div_element:
+    #     select_color = div_element.text.strip().replace('Size', 'Color')
+    #     print('Title color: ', select_color)
 
     color_vars = soup.find_all('input', class_='color-select-input', attrs={'name': 'color'})
     values = []
     for color_var in color_vars:
         value = color_var.get('value')
         values.append(value)
-        values_str = ', '.join(values)
+    values_str = ', '.join(values)
 
     print('Color:', values_str)
 
@@ -90,7 +90,7 @@ def get_data(url):
         'price': price,
         'description': formatted_text,
         'category': category,
-        'image_urls': best_image_url,
+        'image_urls': ', '.join(image_urls),
         'size_title': size_title,
         'size': labels,
         'color_title': color_title,
@@ -98,7 +98,6 @@ def get_data(url):
         'id': id,
     }
     write_data_csv(FILEPARAMS, data)
-
 
 def main():
     order = ['title', 'price', 'description', 'category', 'image_urls', 'size_title', 'size', 'color_title', 'color_value', 'id']
