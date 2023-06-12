@@ -6,7 +6,7 @@ import csv
 import hashlib
 
 directory = 'templates/../../../../done_csv'
-filename = 'everyday_bottomwear_women.csv'
+filename = 'womens_cozy_loungewear.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 def create_csv(filename, order):
@@ -21,7 +21,7 @@ def get_data(url):
     html = requests.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
 
-    category = "Fashion + Comfort Joggers"
+    category = "Women's Luxury Summer Set"
     print('Category: ', category)
     title_element = soup.find('h1', {'class': 'capitalize'})
     title = title_element.text.strip() if title_element and title_element.text.strip() != 'Default Title' else ''
@@ -96,7 +96,7 @@ def get_data(url):
 def main():
     order = ['title', 'price', 'description', 'category', 'image_urls', 'size_title', 'size', 'color_title', 'color_value', 'id']
     create_csv(FILEPARAMS, order)
-    with open('templates/../../../../urls_csv/everyday_bottomwear_women.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../../../../urls_csv/womens_cozy_loungewear.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
