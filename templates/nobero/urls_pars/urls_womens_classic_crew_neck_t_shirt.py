@@ -10,7 +10,7 @@ options.add_argument('--headless')  # Открытие браузера в фо�
 # Инициализация веб-драйвера
 driver = webdriver.Chrome(options=options)
 
-base_url = "https://nobero.com/collections/mens-cozy-loungewear"
+base_url = "https://nobero.com/collections/womens-classic-crew-neck-t-shirt"
 driver.get(base_url)
 
 # Прокрутка страницы для динамической загрузки контента
@@ -33,13 +33,13 @@ for link_element in link_elements:
 
 # Запись ссылок на товары в файл CSV
 fieldnames = ['url']
-with open('templates/../../urls_csv/mens_cozy_loungewear.csv', 'w', newline='', encoding='utf-8') as file:
+with open('templates/../../urls_csv/womens_classic_crew_neck_t_shirt.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.DictWriter(file, fieldnames=fieldnames)
     writer.writeheader()
     for link in product_links:
         writer.writerow({'url': link})
 
-print("Ссылки на товары были успешно записаны в файл 'men-shorts-collection.csv'.")
+print("Ссылки на товары были успешно записаны в файл 'womens-classic-crew-neck-t-shirt.csv'.")
 
 # Закрытие веб-драйвера
 driver.quit()

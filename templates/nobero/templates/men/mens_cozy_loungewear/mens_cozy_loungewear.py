@@ -71,13 +71,6 @@ def get_data(url):
     color_title = "Select Color"
     print('Title color: ', color_title)
 
-    # div_element = soup.find('div', class_='capitalize pb-4 flex justify-between items-center')
-    # if div_element:
-    #     select_color = div_element.text.strip().replace('Size', 'Color')
-    #     print('Title color: ', select_color)
-
-    # Previous code...
-
     color_vars = soup.find_all('input', class_='color-select-input', attrs={'name': 'color'})
     values = [color_var.get('value') for color_var in color_vars if color_var.get('value')]
     values_str = '|'.join(values)
