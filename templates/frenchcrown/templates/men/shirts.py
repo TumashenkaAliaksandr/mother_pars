@@ -24,7 +24,7 @@ def get_data(url):
     category = "Men’s Shirts"
     print('Category: ', category)
 
-    title_element = soup.find('h1', {'class': 'capitalize'})
+    title_element = soup.find('h1', {'class': 'ProductMeta__Title'})
     title = title_element.text.strip() if title_element and title_element.text.strip() != 'Default Title' else ''
     print('Title: ', title)
     price_element = soup.find('h2', {'id': 'variant-price'})
