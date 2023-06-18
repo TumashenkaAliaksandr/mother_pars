@@ -47,7 +47,7 @@ def get_data(url):
     print('Description:', '\n', formatted_text)
 
 
-    image_elements = soup.select('img.Image--lazyLoaded')
+    image_elements = soup.select('img', {'сlass': 'Image--lazyLoaded'})
     image_urls = set()  # Множество для хранения уникальных URL-ссылок на изображения
     for img in image_elements:
         src_match = re.search(r'src="([^"]+)"', str(img))
@@ -67,9 +67,10 @@ def get_data(url):
     size_title = "Select Size"
     print('size_title:', size_title)
 
-    label_elements = soup.select('label[for^="size-"]')
+    label_elements = soup.find('div', class_='Popover__ValueList')
     formatted_labels = [label.text.strip() for label in label_elements if label.text.strip()]
     labels = '|'.join(formatted_labels)
+    print(labels)
 
 
     color_title = "Select Color"
