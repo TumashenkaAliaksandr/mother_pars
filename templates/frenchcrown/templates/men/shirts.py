@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import csv
 import hashlib
 
-directory = 'templates/../../done_csv'
+directory = 'templates/../../../done_csv'
 filename = 'urls_shirts.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
@@ -21,19 +21,17 @@ def get_data(url):
     html = requests.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
 
+    title = soup.find("h1", class_="ProductMeta__Title").text.strip()  # этот кусок кода для тайтла
+    print('Title: ', title)
+
     category = "Men’s Shirts"
     print('Category: ', category)
 
-    title_element = soup.find('h1', {'class': 'ProductMeta__Title'})
-    title = title_element.text.strip() if title_element and title_element.text.strip() != 'Default Title' else ''
-    print('Title: ', title)
-    price_element = soup.find('h2', {'id': 'variant-price'})
-    price = price_element.text.replace('₹', '').strip()
+    price = soup.find('span', class_="ProductMeta__Price").text.replace('₹', '').strip()
     print('Price: ', price)
 
-    desc_container = soup.find('details', {'class': 'filter-group'})
+    desc_container = soup.find('div', {'class': 'Collapsible Collapsible--large'})
     desc = desc_container.text.strip() if desc_container else ''
-    print('Description:', '\n', desc)
 
     lines = []
     current_line = ''
@@ -46,15 +44,20 @@ def get_data(url):
     if current_line:
         lines.append(current_line)
     formatted_text = '\n'.join(lines)
+    print('Description:', '\n', formatted_text)
 
-    image_elements = soup.select('img.image-placeholder-bg')
-    image_urls = set()  # Set to store unique image URLs
+
+    image_elements = soup.select('img.Image--lazyLoaded')
+    image_urls = set()  # Множество для хранения уникальных URL-ссылок на изображения
     for img in image_elements:
-        image_url = 'https:' + img['src']
-        image_width = int(img['width']) if 'width' in img.attrs else 0
-        if image_width != 75:  # Exclude images with width=75
-            image_urls.add(image_url)
-    print('Images:', image_urls)
+        src_match = re.search(r'src="([^"]+)"', str(img))
+        if src_match:
+            image_url = 'https:' + src_match.group(1)
+            if not image_url.startswith('data:image'):  # Исключаем изображения с URL, начинающимися с 'data:image'
+                image_width = int(img['width']) if 'width' in img.attrs else 0
+                if image_width != 75:  # Исключаем изображения с шириной 75 пикселей
+                    image_urls.add(image_url)
+    print('Изображения:', image_urls)
 
     match = re.search(r'v=(\d+)', list(image_urls)[0])
     if match:
@@ -97,7 +100,7 @@ def get_data(url):
 def main():
     order = ['title', 'price', 'description', 'category', 'image_urls', 'size_title', 'size', 'color_title', 'color_value', 'id']
     create_csv(FILEPARAMS, order)
-    with open('templates/../../urls_csv/urls_shirts.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../../../urls_csv/urls_shirts.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
