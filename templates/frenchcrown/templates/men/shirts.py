@@ -27,6 +27,7 @@ def get_data(url):
     print('Title: ', title)
 
     category = "Men’s Shirts"
+    sub_category = 'Men’s White Shirts'
     print('Category: ', category)
 
     price = soup.find('span', class_="ProductMeta__Price").text.replace('₹', '').strip()
@@ -128,6 +129,7 @@ def get_data(url):
         'price': price,
         'story_description': formatted_text,
         'category': category,
+        'sub_category': sub_category,
         'image_urls': ', '.join(image_urls),  # Заменил переменную src на image_urls
         'size_title': size_title,
         'size': labels,
@@ -138,7 +140,7 @@ def get_data(url):
 
 
 def main():
-    order = ['title', 'price', 'story_description', 'category', 'image_urls', 'size_title', 'size', 'description', 'id']
+    order = ['title', 'price', 'story_description', 'category', 'sub_category', 'image_urls', 'size_title', 'size', 'description', 'id']
     create_csv(FILEPARAMS, order)
     with open('templates/../../../urls_csv/urls_shirts.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
