@@ -1,5 +1,7 @@
 import os
 import re
+import textwrap
+
 import requests
 from bs4 import BeautifulSoup
 import csv
@@ -45,6 +47,23 @@ def get_data(url):
         lines.append(current_line)
     formatted_text = '\n'.join(lines)
     print('Description:', '\n', formatted_text)
+
+    desc_two = ""
+    # Извлекаем текст из <div class="Rte">
+    rte_div = soup.find('div', class_='Rte')
+    if rte_div:
+        rte_text = rte_div.get_text(strip=True)
+        rte_text = textwrap.fill(rte_text, width=100)
+        desc_two += rte_text
+
+    # Извлекаем текст из <div class="product-extra-info">
+    extra_info_div = soup.find('div', class_='product-extra-info')
+    if extra_info_div:
+        extra_info_items = extra_info_div.find_all('li')
+        extra_info_text = '\n'.join([textwrap.fill(item.get_text(strip=True), width=100) for item in extra_info_items])
+        desc_two += extra_info_text
+
+    print(desc_two)
 
     main_image_element = soup.find('img', class_='Image--lazyLoaded')
 
@@ -94,34 +113,32 @@ def get_data(url):
     labels = '|'.join(formatted_labels)
     print(labels)
 
-    color_title = "Select Color"
-    print('Title color: ', color_title)
+    # color_title = "Select Color"
+    # print('Title color: ', color_title)
+    #
+    # color_vars = soup.find_all('input', class_='color-select-input', attrs={'name': 'color'})
+    # values = [color_var.get('value') for color_var in color_vars if color_var.get('value')]
+    # values_str = '|'.join(values)
+    #
+    # print('Color:', values_str)
 
-    color_vars = soup.find_all('input', class_='color-select-input', attrs={'name': 'color'})
-    values = [color_var.get('value') for color_var in color_vars if color_var.get('value')]
-    values_str = '|'.join(values)
-
-    print('Color:', values_str)
-
-    # Previous code...
 
     data = {
         'title': title,
         'price': price,
-        'description': formatted_text,
+        'story_description': formatted_text,
         'category': category,
         'image_urls': ', '.join(image_urls),  # Заменил переменную src на image_urls
         'size_title': size_title,
         'size': labels,
-        'color_title': color_title,
-        'color_value': values_str,
+        'description': desc_two,
         'id': id,
     }
     write_data_csv(FILEPARAMS, data)
 
 
 def main():
-    order = ['title', 'price', 'description', 'category', 'image_urls', 'size_title', 'size', 'color_title', 'color_value', 'id']
+    order = ['title', 'price', 'story_description', 'category', 'image_urls', 'size_title', 'size', 'description', 'id']
     create_csv(FILEPARAMS, order)
     with open('templates/../../../urls_csv/urls_shirts.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
