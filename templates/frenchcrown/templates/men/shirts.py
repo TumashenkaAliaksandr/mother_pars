@@ -46,47 +46,43 @@ def get_data(url):
     formatted_text = '\n'.join(lines)
     print('Description:', '\n', formatted_text)
 
-
     main_image_element = soup.find('img', class_='Image--lazyLoaded')
-    image_urls = set()
+
+    # Переменная для хранения найденного id
+    id = None
 
     if main_image_element:
         main_image_url = 'https:' + main_image_element['src']
-        image_url = main_image_url
-        image_urls.add(image_url)
-        print('Главное фото товара:', main_image_url)
-    else:
-        print('Главное фото товара не найдено.')
 
-    if image_urls:
-        match = re.search(r'v=(\d+)', list(image_urls)[0])
+        match = re.search(r'v=(\d+)', main_image_url)
         if match:
             id = match.group(1)
             print("ID:", id)
-
+    else:
+        print('Главное фото товара не найдено.')
 
     # Находим <div> элемент с классом "Product__Slideshow"
     slideshow_div = soup.find('div', class_='Product__Slideshow')
 
     # Если найден <div> элемент с классом "Product__Slideshow"
     if slideshow_div:
-        # Находим все <div> элементы с классом "Product__SlideItem" внутри слайдшоу
-        slide_items = slideshow_div.find_all('div', class_='Product__SlideItem')
+        # Инициализируем переменную для хранения списка фото товара
+        image_urls = []
 
-        # Итерируемся по каждому <div> элементу
-        for slide_item in slide_items:
-            # Находим все <img> элементы внутри текущего <div> элемента
-            img_elements = slide_item.find_all('img')
+        # Находим все <img> элементы внутри слайдшоу
+        img_elements = slideshow_div.find_all('img')
 
-            # Итерируемся по каждому <img> элементу
-            for img_element in img_elements:
-                # Извлекаем значение атрибута src
-                src = 'https:' + img_element['src']
+        # Итерируемся по каждому <img> элементу
+        for img_element in img_elements:
+            # Извлекаем значение атрибута src
+            src = 'https:' + img_element['src']
 
-                # Проверяем, что значение атрибута src не содержит "data:image"
-                if 'data:image' not in src:
-                    # Выводим значение атрибута src
-                    print('Фото товара:', src)
+            # Проверяем, что значение атрибута src не содержит "data:image"
+            if 'data:image' not in src:
+                # Добавляем значение атрибута src в список фото товара
+                image_urls.append(src)
+                print('Фото:', src)
+
     else:
         print('Слайдшоу товара не найдено.')
 
@@ -97,7 +93,6 @@ def get_data(url):
     formatted_labels = [label.text.strip() for label in label_elements if label.text.strip()]
     labels = '|'.join(formatted_labels)
     print(labels)
-
 
     color_title = "Select Color"
     print('Title color: ', color_title)
@@ -115,7 +110,7 @@ def get_data(url):
         'price': price,
         'description': formatted_text,
         'category': category,
-        'image_urls': src,
+        'image_urls': ', '.join(image_urls),  # Заменил переменную src на image_urls
         'size_title': size_title,
         'size': labels,
         'color_title': color_title,
@@ -123,6 +118,7 @@ def get_data(url):
         'id': id,
     }
     write_data_csv(FILEPARAMS, data)
+
 
 def main():
     order = ['title', 'price', 'description', 'category', 'image_urls', 'size_title', 'size', 'color_title', 'color_value', 'id']
