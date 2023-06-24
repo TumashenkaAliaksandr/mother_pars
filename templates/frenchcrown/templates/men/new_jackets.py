@@ -8,7 +8,7 @@ import csv
 import hashlib
 
 directory = 'templates/../../../done_csv'
-filename = 'new_tshirts'
+filename = 'new_jackets.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 def create_csv(filename, order):
@@ -27,7 +27,7 @@ def get_data(url):
     print('Title: ', title)
 
     category = "Men’s"
-    sub_category = 'Men’s New T-shirts / Polos / Sweatshirts'
+    sub_category = 'Men’s New Jackets / Overshirts'
     print('Category: ', category)
 
     price = soup.find('span', class_="ProductMeta__Price").text.replace('₹', '').strip()
@@ -142,7 +142,7 @@ def get_data(url):
 def main():
     order = ['title', 'price', 'story_description', 'category', 'sub_category', 'image_urls', 'size_title', 'size', 'description', 'id']
     create_csv(FILEPARAMS, order)
-    with open('templates/../../../urls_csv/urls_new_tshirts.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../../../urls_csv/urls_new_jackets.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)

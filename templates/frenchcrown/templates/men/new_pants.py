@@ -26,7 +26,7 @@ def get_data(url):
     title = soup.find("h1", class_="ProductMeta__Title").text.strip()  # этот кусок кода для тайтла
     print('Title: ', title)
 
-    category = "Men’s Pants"
+    category = "Men’s"
     sub_category = 'Men’s New Pants'
     print('Category: ', category)
 

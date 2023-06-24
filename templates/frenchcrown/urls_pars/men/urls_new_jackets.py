@@ -9,7 +9,7 @@ options.add_argument('--headless')  # Открытие браузера в фо�
 # Инициализация веб-драйвера
 driver = webdriver.Chrome(options=options)
 
-base_url = "https://frenchcrown.in/collections/new-blazers"
+base_url = "https://frenchcrown.in/collections/new-jackets"
 driver.get(base_url)
 
 # Получение ссылок на товары
@@ -22,13 +22,13 @@ for link_element in link_elements:
 
 # Запись ссылок на товары в файл CSV
 fieldnames = ['url']
-with open('templates/../../../urls_csv/urls_new_blazers.csv', 'w', newline='', encoding='utf-8') as file:
+with open('templates/../../../urls_csv/urls_new_jackets.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.DictWriter(file, fieldnames=fieldnames)
     writer.writeheader()
     for link in product_links:
         writer.writerow({'url': link})
 
-print("Ссылки на товары были успешно записаны в файл 'urls_new_blazers.csv'.")
+print("Ссылки на товары были успешно записаны в файл 'urls_new_jackets.csv'.")
 
 # Закрытие веб-драйвера
 driver.quit()
