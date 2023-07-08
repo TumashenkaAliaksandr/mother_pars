@@ -36,7 +36,8 @@ table = soup.find("table", id="product-attribute-specs-table")
 caption = table.find("caption", class_="table-caption").text.strip()
 print("Table Caption:", caption)
 
-# Итерироваться по строкам таблицы
+# Итерироваться по строкам таблицы и собрать текст из всех ячеек в одну переменную
+description_all = ""
 rows = table.find_all("tr")
 for row in rows:
     # Найти теги <th> и <td> внутри строки
@@ -46,6 +47,7 @@ for row in rows:
     for tag in th_tags:
         text = tag.text.strip()
         wrapped_text = textwrap.fill(text, width=100, break_long_words=False)
+        description_all += wrapped_text + "\n"
         print(wrapped_text)
     print()
 
@@ -55,9 +57,9 @@ product_id = product_id_element.text.strip() if product_id_element else "N/A"
 print('Product id: ', product_id)
 
 # Записать данные в файл CSV
-with open("product_info.csv", "w", newline="") as csvfile:
+with open("product_info.csv", "w", newline="", encoding="utf-8") as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow(["Title", "Price", "Photo", "Description", "Category", "ID"])
-    writer.writerow([title, price, photo, wrapped_description, category, product_id])
+    writer.writerow(["Title", "Price", "Photo", "Description", "Description_all", "Category", "ID"])
+    writer.writerow([title, price, photo, wrapped_description, description_all, category, product_id])
 
 print("Информация о товаре успешно записана в файл product_info.csv.")
