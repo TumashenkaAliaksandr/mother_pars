@@ -23,10 +23,10 @@ while True:
 
     page_num += 1
 
-with open("../../urls_csv/products.csv", "w", newline="") as csvfile:
+with open("../../urls_csv/urls_room_diffuser.csv", "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["Ссылка на товар"])
     for link in links:
         writer.writerow([link])
 
-print("Ссылки на товары успешно записаны в файл products.csv.")
+print("Ссылки на товары успешно записаны в файл urls_room_diffuser.csv.")
