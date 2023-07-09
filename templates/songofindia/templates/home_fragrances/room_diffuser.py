@@ -20,9 +20,25 @@ print('Category: ', category)
 price = soup.find("span", class_="price").text.replace('₹', '').strip()
 print('Price: ', price)
 
-# Найти ссылку на фото товара
-photo = soup.find("div", class_="product media").find("img")["src"]
-print('Photo urls: ', photo)
+# Найти контейнеры с классом "fotorama__stage__frame"
+frame_containers = soup.find_all("div", {"class": "fotorama__stage__frame"})
+photos = []
+
+# Извлечь URL-адреса фотографий из атрибутов "src" тегов "img"
+for container in frame_containers:
+    img_tag = container.find("img")
+    if img_tag:
+        photo_url = img_tag.get("src")
+        if photo_url:
+            photos.append(photo_url)
+
+# Если список фотографий пуст, добавить значение 'N/A'
+if not photos:
+    photos.append('N/A')
+
+# Вывести список URL-адресов фотографий
+print('Photo URLs:', photos)
+
 
 # Найти описание товара
 description = soup.find("div", class_="product attribute overview").find("div", class_="value").text.strip()
@@ -60,6 +76,6 @@ print('Product id: ', product_id)
 with open("product_info.csv", "w", newline="", encoding="utf-8") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["Title", "Price", "Photo", "Description", "Description_all", "Category", "ID"])
-    writer.writerow([title, price, photo, wrapped_description, description_all, category, product_id])
+    writer.writerow([title, price, photos, wrapped_description, description_all, category, product_id])
 
 print("Информация о товаре успешно записана в файл product_info.csv.")
