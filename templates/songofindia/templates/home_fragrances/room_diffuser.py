@@ -21,16 +21,14 @@ price = soup.find("span", class_="price").text.replace('₹', '').strip()
 print('Price: ', price)
 
 # Найти контейнеры с классом "fotorama__stage__frame"
-frame_containers = soup.find_all("div", {"class": "fotorama__stage__frame"})
+frame_containers = soup.find_all("div", {"class": "fotorama__stage__shaft"})
 photos = []
 
-# Извлечь URL-адреса фотографий из атрибутов "src" тегов "img"
+# Извлечь URL-адреса фотографий из атрибутов "href"
 for container in frame_containers:
-    img_tag = container.find("img")
+    img_tag = container.find("href")
     if img_tag:
-        photo_url = img_tag.get("src")
-        if photo_url:
-            photos.append(photo_url)
+        photos.append(img_tag)
 
 # Если список фотографий пуст, добавить значение 'N/A'
 if not photos:
@@ -67,8 +65,9 @@ for row in rows:
         print(wrapped_text)
     print()
 
+
 # Найти ID товара (если доступно)
-product_id_element = soup.find("span", class_="sku")
+product_id_element = soup.find("div", class_="fotorama__caption__wrap")
 product_id = product_id_element.text.strip() if product_id_element else "N/A"
 print('Product id: ', product_id)
 

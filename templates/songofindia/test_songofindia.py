@@ -77,21 +77,72 @@ div_block = soup.find("div", {"class": "fotorama__stage__frame"})
 
 # Проверяем, что блок найден
 if div_block is not None:
-    # Находим все изображения внутри блока
-    images = div_block.find_all("img")
+    # Извлекаем значение атрибута href
+    href = div_block.get("href")
 
-    # Получаем ссылки на изображения
-    image_urls = [img.get("src") for img in images]
+    # Извлекаем значение атрибута id
+    div_id = div_block.find("div", {"class": "fotorama__caption__wrap"}).get("id")
 
-    # Выводим ссылки на изображения
-    for url in image_urls:
-        print(url)
+    # Выводим результаты
+    print("Href:", href)
+    print("ID:", div_id)
 else:
     print("Блок не найден.")
+from bs4 import BeautifulSoup
+
+import requests
+from bs4 import BeautifulSoup
+
+# Ссылка на страницу с товаром
+url = "https://www.songofindia.co.in/index.php/mysore-chandan-sandalwood-organic-ambience-diffuser-with-reeds.html"
+
+# Получаем HTML-код страницы
+response = requests.get(url)
+html_content = response.text
+
+# Создаем объект BeautifulSoup для парсинга HTML
+soup = BeautifulSoup(html_content, "html.parser")
+
+# Найти элемент с классом "fotorama__stage__shaft"
+shaft_element = soup.find('div', class_='fotorama__stage__shaft')
+
+if shaft_element is not None:
+    # Найти все элементы с классом "fotorama__stage__frame" внутри элемента "shaft_element"
+    frame_elements = shaft_element.find_all('div', class_='fotorama__stage__frame')
+
+    # Получить значения атрибута "src" изображений внутри каждого элемента "frame_element"
+    src_values = [frame.find('img', class_='fotorama__img--full').get('src') for frame in frame_elements]
+
+    # Вывести результаты
+    print('src values:', src_values)
+else:
+    print("Элемент 'fotorama__stage__shaft' не найден.")
 
 
+import requests
+from lxml import html
 
+# Ссылка на страницу с товаром
+url = "https://www.songofindia.co.in/index.php/mysore-chandan-sandalwood-organic-ambience-diffuser-with-reeds.html"
 
+# Получаем HTML-код страницы
+response = requests.get(url)
+html_content = response.content
 
+# Создаем объект ElementTree для парсинга HTML с помощью lxml
+tree = html.fromstring(html_content)
 
+# Найти элемент с классом "fotorama__stage__shaft"
+shaft_element = tree.xpath('//div[@class="fotorama__stage__shaft"]')
 
+if shaft_element:
+    # Найти все элементы с классом "fotorama__stage__frame" внутри элемента "shaft_element"
+    frame_elements = shaft_element[0].findall('.//div[@class="fotorama__stage__frame"]')
+
+    # Получить значения атрибута "src" изображений внутри каждого элемента "frame_element"
+    src_values = [frame.find('img').get('src') for frame in frame_elements]
+
+    # Вывести результаты
+    print('src values:', src_values)
+else:
+    print("Элемент 'fotorama__stage__shaft' не найден.")
