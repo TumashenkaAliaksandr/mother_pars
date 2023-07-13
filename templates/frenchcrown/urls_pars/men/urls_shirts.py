@@ -22,7 +22,7 @@ for link_element in link_elements:
 
 # Запись ссылок на товары в файл CSV
 fieldnames = ['url']
-with open('templates/../../urls_csv/urls_shirts.csv', 'w', newline='', encoding='utf-8') as file:
+with open('templates/../../../urls_csv/urls_shirts.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.DictWriter(file, fieldnames=fieldnames)
     writer.writeheader()
     for link in product_links:
