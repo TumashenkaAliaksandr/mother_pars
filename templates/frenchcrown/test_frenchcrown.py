@@ -1,34 +1,33 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+import requests
 import csv
 
-# Опции для веб-драйвера
-options = Options()
-options.add_argument('--headless')  # Открытие браузера в фоновом режиме
+base_url = "https://hits.gokwik.co/api/v1/header/events/update"
 
-# Инициализация веб-драйвера
-driver = webdriver.Chrome(options=options)
+def main(base_url):
+    product_links = set()
+    page = 1
 
-base_url = "https://frenchcrown.in/collections/white-shirts"
-driver.get(base_url)
+    while True:
+        url = f"{base_url}?page={page}"
+        response = requests.get(url)
+        json_data = response.json()
 
-# Получение ссылок на товары
-product_links = []
-link_elements = driver.find_elements("css selector", "div.ProductItem__Wrapper a")
-for link_element in link_elements:
-    link = link_element.get_attribute("href")
-    if link and "/products/" in link:
-        product_links.append(link)
+        # Проверяем, есть ли еще страницы
+        if not json_data or not json_data.get("data"):
+            break
 
-# Запись ссылок на товары в файл CSV
-fieldnames = ['url']
-with open('templates/../urls_csv/urls_shirts.csv', 'w', newline='', encoding='utf-8') as file:
-    writer = csv.DictWriter(file, fieldnames=fieldnames)
-    writer.writeheader()
-    for link in product_links:
-        writer.writerow({'url': link})
+        for item in json_data["data"]:
+            link = item.get("url")
+            if link:
+                product_links.add(link)
 
-print("Ссылки на товары были успешно записаны в файл 'urls_shirts.csv'.")
+        page += 1
 
-# Закрытие веб-драйвера
-driver.quit()
+    with open('urls_boxers.csv', 'w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['url'])
+        writer.writerows([[link] for link in product_links])
+
+    print("Ссылки на товары были успешно записаны в файл 'urls_boxers.csv'.")
+
+main(base_url)

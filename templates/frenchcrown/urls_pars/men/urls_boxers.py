@@ -13,10 +13,10 @@ def main(base_url):
 
     response = s.get(base_url)
 
-    with open('urls_boxers.csv', 'w', newline='', encoding='utf-8') as file:
+    with open('boxers.html', 'w', newline='', encoding='utf-8') as file:
         file.write(response.text)
 
-    print("Ссылки на товары были успешно записаны в файл 'urls_boxers.csv'.")
+    print("Ссылки на товары были успешно записаны в файл 'boxers.html'.")
 
 
 main(base_url)
