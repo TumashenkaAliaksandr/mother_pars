@@ -1,45 +1,22 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
-import time
-import csv
+from requests import Session
 
-# Опции для веб-драйвера
-options = Options()
-options.add_argument('--headless')  # Открытие браузера в фоновом режиме
-
-# Инициализация веб-драйвера
-driver = webdriver.Chrome(options=options)
 
 base_url = "https://frenchcrown.in/collections/boxers"
-driver.get(base_url)
 
-# Скроллинг страницы вниз, чтобы загрузить все товары
-while True:
-    last_height = driver.execute_script("return document.body.scrollHeight")
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(2)
-    new_height = driver.execute_script("return document.body.scrollHeight")
-    if new_height == last_height:
-        break
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+}
 
-# Получение ссылок на товары
-product_links = set()
-link_elements = driver.find_elements("css selector", "div.ProductItem__Wrapper a")
-for link_element in link_elements:
-    link = link_element.get_attribute("href")
-    if link and "/products/" in link:
-        product_links.add(link)
+def main(base_url):
+    s = Session()
+    s.headers.update(headers)
 
-# Запись ссылок на товары в файл CSV
-fieldnames = ['url']
-with open('templates/../../../urls_csv/urls_boxers.csv', 'w', newline='', encoding='utf-8') as file:
-    writer = csv.DictWriter(file, fieldnames=fieldnames)
-    writer.writeheader()
-    for link in product_links:
-        writer.writerow({'url': link})
+    response = s.get(base_url)
 
-print("Ссылки на товары были успешно записаны в файл 'urls_boxers.csv'.")
+    with open('urls_boxers.csv', 'w', newline='', encoding='utf-8') as file:
+        file.write(response.text)
 
-# Закрытие веб-драйвера
-driver.quit()
+    print("Ссылки на товары были успешно записаны в файл 'urls_boxers.csv'.")
+
+
+main(base_url)
