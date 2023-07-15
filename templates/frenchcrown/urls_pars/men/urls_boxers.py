@@ -1,5 +1,6 @@
 from requests import Session
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
 base_url = "https://frenchcrown.in/collections/boxers"
 
@@ -31,8 +32,8 @@ def main(base_url):
         for card in cards:
             link_element = card.find("a", target="_blank")
             link = link_element.get("href")
-            print(link)
-
+            full_link = urljoin(base_url, link)
+            print(full_link)
 
         if count == pagination:
             break
@@ -47,6 +48,7 @@ def main(base_url):
 
 
 main(base_url)
+
 
 
 
