@@ -12,6 +12,7 @@ def main(base_url):
     s.headers.update(headers)
 
     count = 1
+    pagination = 0
     while True:
 
         if count > 1:
@@ -32,29 +33,21 @@ def main(base_url):
             link = link_element.get("href")
             print(link)
 
+
         if count == pagination:
             break
 
         count += 1
 
 
-    # with open('boxers.html', 'w', newline='', encoding='utf-8') as file:
-    #     file.write(response.text)
-    #
-    # print("Ссылки на товары были успешно записаны в файл 'boxers.html'.")
+    with open('boxers.html', 'w', newline='', encoding='utf-8') as file:
+        file.write(response.text)
+
+    print("Ссылки на товары были успешно записаны в файл 'boxers.html'.")
 
 
 main(base_url)
 
-
-
-    # with open('boxers.html', 'w', newline='', encoding='utf-8') as file:
-    #     file.write(response.text)
-    #
-    # print("Ссылки на товары были успешно записаны в файл 'boxers.html'.")
-
-
-main(base_url)
 
 
 # import requests
