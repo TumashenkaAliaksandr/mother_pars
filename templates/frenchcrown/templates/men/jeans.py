@@ -5,7 +5,6 @@ import textwrap
 import requests
 from bs4 import BeautifulSoup
 import csv
-import hashlib
 
 directory = 'templates/../../../done_csv'
 filename = 'men_jeans.csv'
@@ -27,7 +26,7 @@ def get_data(url):
     print('Title: ', title)
 
     category = "Men’s"
-    sub_category = 'Men’s New Jackets / Overshirts'
+    sub_category = 'Men’s Jeans'
     print('Category: ', category)
 
     price = soup.find('span', class_="ProductMeta__Price").text.replace('₹', '').strip()
@@ -110,9 +109,12 @@ def get_data(url):
     print('size_title:', size_title)
 
     label_elements = soup.find('div', class_='Popover__ValueList')
-    formatted_labels = [label.text.strip() for label in label_elements if label.text.strip()]
-    labels = '|'.join(formatted_labels)
-    print(labels)
+    if label_elements:
+        formatted_labels = [label.text.strip() for label in label_elements if label.text.strip()]
+        labels = '|'.join(formatted_labels)
+        print(labels)
+    else:
+        labels = ''
 
     # color_title = "Select Color"
     # print('Title color: ', color_title)
