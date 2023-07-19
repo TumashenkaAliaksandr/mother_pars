@@ -5,10 +5,9 @@ import textwrap
 import requests
 from bs4 import BeautifulSoup
 import csv
-import hashlib
 
 directory = 'templates/../../../done_csv'
-filename = 'urls_shirts.csv'
+filename = 'shirts.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 def create_csv(filename, order):
@@ -27,7 +26,7 @@ def get_data(url):
     print('Title: ', title)
 
     category = "Men’s Shirts"
-    sub_category = 'Men’s White Shirts'
+    sub_category = 'Men’s Shirts'
     print('Category: ', category)
 
     price = soup.find('span', class_="ProductMeta__Price").text.replace('₹', '').strip()
