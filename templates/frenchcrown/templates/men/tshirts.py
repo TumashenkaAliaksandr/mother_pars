@@ -5,10 +5,9 @@ import textwrap
 import requests
 from bs4 import BeautifulSoup
 import csv
-import hashlib
 
 directory = 'templates/../../../done_csv'
-filename = 'new_tshirts'
+filename = 'tshirts.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 def create_csv(filename, order):
@@ -26,8 +25,8 @@ def get_data(url):
     title = soup.find("h1", class_="ProductMeta__Title").text.strip()  # этот кусок кода для тайтла
     print('Title: ', title)
 
-    category = "Men’s"
-    sub_category = 'Men’s New T-shirts / Polos / Sweatshirts'
+    category = "Men’s Shirts"
+    sub_category = 'Men’s Tshirts / Polos / Sweatshirts'
     print('Category: ', category)
 
     price = soup.find('span', class_="ProductMeta__Price").text.replace('₹', '').strip()
@@ -142,7 +141,7 @@ def get_data(url):
 def main():
     order = ['title', 'price', 'story_description', 'category', 'sub_category', 'image_urls', 'size_title', 'size', 'description', 'id']
     create_csv(FILEPARAMS, order)
-    with open('templates/../../../urls_csv/urls_new_tshirts.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../../../urls_csv/urls_tshirts.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
