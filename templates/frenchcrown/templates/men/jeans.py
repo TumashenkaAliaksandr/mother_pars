@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import csv
 
 directory = 'templates/../../../done_csv'
-filename = 'men_jeans.csv'
+filename = 'jeans.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 def create_csv(filename, order):
@@ -25,7 +25,7 @@ def get_data(url):
     title = soup.find("h1", class_="ProductMeta__Title").text.strip()  # этот кусок кода для тайтла
     print('Title: ', title)
 
-    category = "Men’s"
+    category = "Men’s Jeans"
     sub_category = 'Men’s Jeans'
     print('Category: ', category)
 
@@ -109,12 +109,9 @@ def get_data(url):
     print('size_title:', size_title)
 
     label_elements = soup.find('div', class_='Popover__ValueList')
-    if label_elements:
-        formatted_labels = [label.text.strip() for label in label_elements if label.text.strip()]
-        labels = '|'.join(formatted_labels)
-        print(labels)
-    else:
-        labels = ''
+    formatted_labels = [label.text.strip() for label in label_elements if label.text.strip()]
+    labels = '|'.join(formatted_labels)
+    print(labels)
 
     # color_title = "Select Color"
     # print('Title color: ', color_title)
