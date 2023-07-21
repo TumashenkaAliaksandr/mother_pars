@@ -8,7 +8,7 @@ import csv
 import hashlib
 
 directory = 'templates/../../../done_csv'
-filename = '1pants.csv'
+filename = 'co_ord_sets.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 def create_csv(filename, order):
@@ -29,7 +29,7 @@ def get_data(url):
     brend = 'Frenchcrown'
 
     category = "Men’s"
-    sub_category = 'Men’s Pants'
+    sub_category = 'Men’s Co-ord Sets'
     print('Category: ', category)
 
     price = soup.find('span', class_="ProductMeta__Price").text.replace('₹', '').strip()
@@ -116,15 +116,6 @@ def get_data(url):
     labels = '|'.join(formatted_labels)
     print(labels)
 
-    # color_title = "Select Color"
-    # print('Title color: ', color_title)
-    #
-    # color_vars = soup.find_all('input', class_='color-select-input', attrs={'name': 'color'})
-    # values = [color_var.get('value') for color_var in color_vars if color_var.get('value')]
-    # values_str = '|'.join(values)
-    #
-    # print('Color:', values_str)
-
 
     data = {
         'title': title,
@@ -145,7 +136,7 @@ def get_data(url):
 def main():
     order = ['title', 'price', 'brend', 'story_description', 'category', 'sub_category', 'image_urls', 'size_title', 'size', 'description', 'id']
     create_csv(FILEPARAMS, order)
-    with open('templates/../../../urls_csv/urls_pants.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../../../urls_csv/urls_co_ord_sets.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
