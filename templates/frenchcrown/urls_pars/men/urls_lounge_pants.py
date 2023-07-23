@@ -63,7 +63,8 @@ def main(base_url):
         writer.writerow(['url'])  # Запись заголовка
         writer.writerows([[link] for link in links])  # Запись ссылок
 
-    print("Ссылки на товары были успешно записаны в файл 'new-jackets.csv'.")
+    print("Ссылки на товары были успешно записаны в файл 'urls_lounge_pants.csv'.")
 
 
 main(base_url)
+
