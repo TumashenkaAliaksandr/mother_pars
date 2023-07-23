@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import csv
 
 directory = 'templates/../../../done_csv'
-filename = 'kurtas.csv'
+filename = 'perfumes.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 def create_csv(filename, order):
@@ -28,7 +28,7 @@ def get_data(url):
     brand = 'Frenchcrown'
 
     category = "Men’s"
-    sub_category = 'Men’s Kurtas'
+    sub_category = 'Men’s Perfumes'
     print('Category: ', category)
 
     price = soup.find('span', class_="ProductMeta__Price").text.replace('₹', '').strip()
@@ -110,9 +110,17 @@ def get_data(url):
     size_title = "Select Size"
     print('size_title:', size_title)
 
-    label_elements = soup.find('div', class_='Popover__ValueList')
-    formatted_labels = [label.text.strip() for label in label_elements if label.text.strip()]
-    labels = '|'.join(formatted_labels)
+    try:
+        label_elements = soup.find('div', class_='Popover__ValueList')
+        if label_elements:
+            formatted_labels = [label.text.strip() for label in label_elements if label.text.strip()]
+            labels = '|'.join(formatted_labels)
+        else:
+            labels = ''
+    except AttributeError as e:
+        print("Error occurred while parsing label elements:", e)
+        labels = ''
+
     print(labels)
 
     # color_title = "Select Color"
@@ -144,7 +152,7 @@ def get_data(url):
 def main():
     order = ['title', 'price', 'brand', 'story_description', 'category', 'sub_category', 'image_urls', 'size_title', 'size', 'description', 'id']
     create_csv(FILEPARAMS, order)
-    with open('templates/../../../urls_csv/urls_kurtas.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../../../urls_csv/urls_perfumes.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
