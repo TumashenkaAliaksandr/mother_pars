@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import csv
 
 directory = 'templates/../../../done_csv'
-filename = 'lounge_pants.csv'
+filename = 'kurtas.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 def create_csv(filename, order):
@@ -144,7 +144,7 @@ def get_data(url):
 def main():
     order = ['title', 'price', 'brand', 'story_description', 'category', 'sub_category', 'image_urls', 'size_title', 'size', 'description', 'id']
     create_csv(FILEPARAMS, order)
-    with open('templates/../../../urls_csv/urls_lounge_pants.csv', 'r', encoding='utf-8') as file:
+    with open('templates/../../../urls_csv/urls_kurtas.csv', 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
             url = line['url']
             get_data(url)
