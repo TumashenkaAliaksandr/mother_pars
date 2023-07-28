@@ -150,10 +150,14 @@
 #     print("Элемент 'fotorama__stage__shaft' не найден.")
 
 import time
+
+import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from bs4 import BeautifulSoup
+from PIL import Image
+from io import BytesIO
 
 # Путь к драйверу Chrome (загрузите драйвер, совместимый с вашей версией Chrome)
 chrome_driver_path = "путь_к_драйверу_chrome"
@@ -202,3 +206,36 @@ if main_image_tag:
         print("Ссылка на фото товара не найдена.")
 else:
     print("Главное фото товара не найдено.")
+
+# Продолжение кода после получения главной фото
+
+# Находим все теги img с классом "fotorama__img"
+all_image_tags = soup.find_all("img", class_="fotorama__img")
+
+# Создаем список для хранения всех ссылок на фотографии большего или среднего размера
+all_large_or_medium_image_urls = []
+
+# Извлекаем ссылки на фотографии из атрибутов "data-full", "data-zoom-image", "src" или "href"
+for image_tag in all_image_tags:
+    image_url = None
+    for attr in ["data-full", "data-zoom-image", "src", "href"]:
+        image_url = image_tag.get(attr)
+        if image_url:
+            break
+    if image_url:
+        # Получаем размер изображения
+        try:
+            response = requests.get(image_url)
+            image = Image.open(BytesIO(response.content))
+            width, height = image.size
+        except Exception as e:
+            width, height = 0, 0
+
+        # Проверяем размер изображения (настройте пороговое значение по вашему усмотрению)
+        if width >= 300 and height >= 300:
+            all_large_or_medium_image_urls.append(image_url)
+
+# Выводим список ссылок на фотографии большего или среднего размера товара
+print("Ссылки на фото товара большего или среднего размера:")
+for image_url in all_large_or_medium_image_urls:
+    print(image_url)
