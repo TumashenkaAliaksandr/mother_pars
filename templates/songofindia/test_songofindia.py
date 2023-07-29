@@ -149,103 +149,14 @@
 # else:
 #     print("Элемент 'fotorama__stage__shaft' не найден.")
 
-# import time
-#
-# import requests
-# from selenium import webdriver
-# from selenium.webdriver.chrome.service import Service as ChromeService
-# from selenium.webdriver.chrome.options import Options as ChromeOptions
-# from bs4 import BeautifulSoup
-# from PIL import Image
-# from io import BytesIO
-#
-# # Путь к драйверу Chrome (загрузите драйвер, совместимый с вашей версией Chrome)
-# chrome_driver_path = "путь_к_драйверу_chrome"
-#
-# # Создаем экземпляр объекта Service
-# service = ChromeService(executable_path=chrome_driver_path)
-#
-# # Создаем объект ChromeOptions
-# chrome_options = ChromeOptions()
-# chrome_options.add_argument("--headless")  # Запускаем в безголовом режиме (без открытия окна браузера)
-#
-# # Создаем экземпляр браузера Chrome
-# driver = webdriver.Chrome(service=service, options=chrome_options)
-#
-# url = "https://www.songofindia.co.in/index.php/mysore-chandan-sandalwood-organic-ambience-diffuser-with-reeds.html"
-#
-# # Загружаем страницу с помощью Selenium
-# driver.get(url)
-#
-# # Ждем некоторое время, чтобы страница полностью загрузилась (при необходимости увеличьте время)
-# time.sleep(5)
-#
-# # Получаем содержимое страницы после выполнения JavaScript
-# page_content = driver.page_source
-#
-# # Закрываем браузер
-# driver.quit()
-#
-# # Создаем объект BeautifulSoup для парсинга HTML-контента
-# soup = BeautifulSoup(page_content, "html.parser")
-#
-# # Находим тег div с классом "fotorama__stage__frame" (предполагаем, что это главное фото товара)
-# main_image_tag = soup.find("div", class_="fotorama__stage__frame")
-#
-# if main_image_tag:
-#     # Получаем значение атрибута "id"
-#     image_id = main_image_tag.get("id")
-#     print("ID главного фото товара:", image_id)
-#
-#     # Получаем ссылку на фото из атрибута "href" или "src" тега "img"
-#     img_tag = main_image_tag.find("img")
-#     if img_tag:
-#         main_image_url = img_tag.get("href") or img_tag.get("src")
-#         print("Ссылка на главное фото товара:", main_image_url)
-#     else:
-#         print("Ссылка на фото товара не найдена.")
-# else:
-#     print("Главное фото товара не найдено.")
-#
-# # Продолжение кода после получения главной фото
-#
-# # Находим все теги img с классом "fotorama__img"
-# all_image_tags = soup.find_all("img", class_="fotorama__img")
-#
-# # Создаем список для хранения всех ссылок на фотографии большего или среднего размера
-# all_large_or_medium_image_urls = []
-#
-# # Извлекаем ссылки на фотографии из атрибутов "data-full", "data-zoom-image", "src" или "href"
-# for image_tag in all_image_tags:
-#     image_url = None
-#     for attr in ["data-full", "data-zoom-image", "src", "href"]:
-#         image_url = image_tag.get(attr)
-#         if image_url:
-#             break
-#     if image_url:
-#         # Получаем размер изображения
-#         try:
-#             response = requests.get(image_url)
-#             image = Image.open(BytesIO(response.content))
-#             width, height = image.size
-#         except Exception as e:
-#             width, height = 0, 0
-#
-#         # Проверяем размер изображения (настройте пороговое значение по вашему усмотрению)
-#         if width >= 300 and height >= 300:
-#             all_large_or_medium_image_urls.append(image_url)
-#
-# # Выводим список ссылок на фотографии большего или среднего размера товара
-# print("Ссылки на фото товара большего или среднего размера:")
-# for image_url in all_large_or_medium_image_urls:
-#     print(image_url)
-
-
-import time
+import time, re
+import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from bs4 import BeautifulSoup
+from PIL import Image
+from io import BytesIO
 
 # Путь к драйверу Chrome (загрузите драйвер, совместимый с вашей версией Chrome)
 chrome_driver_path = "путь_к_драйверу_chrome"
@@ -311,22 +222,38 @@ for image_tag in all_image_tags:
         if image_url:
             break
     if image_url:
-        all_large_or_medium_image_urls.append(image_url)
+        # Получаем размер изображения
+        try:
+            response = requests.get(image_url)
+            image = Image.open(BytesIO(response.content))
+            width, height = image.size
+        except Exception as e:
+            width, height = 0, 0
+
+        # Проверяем размер изображения (настройте пороговое значение по вашему усмотрению)
+        if width >= 300 and height >= 300:
+            all_large_or_medium_image_urls.append(image_url)
 
 # Выводим список ссылок на фотографии большего или среднего размера товара
 print("Ссылки на фото товара большего или среднего размера:")
 for image_url in all_large_or_medium_image_urls:
     print(image_url)
 
-# Находим элемент, содержащий информацию о товаре (например, название, цена, описание)
-product_info_div = soup.find("div", class_="product-info")
+# Находим тег div с классом "fotorama__caption__wrap"
+caption_wrap_div = soup.find("div", class_="fotorama__caption__wrap")
 
-if product_info_div:
-    # Попробуем найти ID товара в атрибуте data-product-id
-    product_id = product_info_div.get("data-product-id")
+if caption_wrap_div:
+    # Получаем значение атрибута "id"
+    caption_id = caption_wrap_div.get("id")
+
+    # Используем регулярное выражение для извлечения только цифр из значения ID
+    # Если ID не содержит цифр, вернется None
+    product_id = re.findall(r'\d+', caption_id)
     if product_id:
+        # Если нашли цифры, возьмем первое значение (так как re.findall() возвращает список найденных совпадений)
+        product_id = product_id[0]
         print("ID товара:", product_id)
     else:
         print("ID товара не найден.")
 else:
-    print("Информация о товаре не найдена.")
+    print("Тег с классом 'fotorama__caption__wrap' не найден.")
