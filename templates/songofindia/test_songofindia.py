@@ -266,14 +266,15 @@ from PIL import Image
 from io import BytesIO
 import csv
 
+
 # Функция для сохранения данных в файл CSV
-def save_to_csv(main_image_url, all_image_urls, product_id):
+def save_to_csv(title, main_image_url, all_image_urls, product_id):
     with open("product_info.csv", "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["Main Image URL", "Other Image URLs", "ID"])
+        writer.writerow(["Title", "Main Image URL", "Other Image URLs", "ID"])
 
         # Записываем данные в строку CSV файла
-        writer.writerow([main_image_url, ', '.join(all_image_urls), product_id])
+        writer.writerow([title, main_image_url, ', '.join(all_image_urls), product_id])
 
     print("Информация о товаре успешно записана в файл product_info.csv.")
 
@@ -296,7 +297,7 @@ url = "https://www.songofindia.co.in/index.php/mysore-chandan-sandalwood-organic
 driver.get(url)
 
 # Ждем некоторое время, чтобы страница полностью загрузилась (при необходимости увеличьте время)
-time.sleep(5)
+time.sleep(3)
 
 # Получаем содержимое страницы после выполнения JavaScript
 page_content = driver.page_source
@@ -306,6 +307,10 @@ driver.quit()
 
 # Создаем объект BeautifulSoup для парсинга HTML-контента
 soup = BeautifulSoup(page_content, "html.parser")
+
+# Найти заголовок товара
+title = soup.find("h1", class_="page-title").text.strip()
+print('Title: ', title)
 
 # Находим тег div с классом "fotorama__stage__frame" (предполагаем, что это главное фото товара)
 main_image_tag = soup.find("div", class_="fotorama__stage__frame")
@@ -374,8 +379,7 @@ else:
     product_id = "Тег с классом 'fotorama__caption__wrap' не найден."
 
 # Сохраняем данные в файл CSV
-save_to_csv(main_image_url, all_large_or_medium_image_urls, product_id)
-
+save_to_csv(title, main_image_url, all_large_or_medium_image_urls, product_id)
 
 
 #------------------------------------------------------------------
