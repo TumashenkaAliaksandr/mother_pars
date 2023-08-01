@@ -268,13 +268,13 @@ import csv
 
 
 # Функция для сохранения данных в файл CSV
-def save_to_csv(title, category, main_image_url, all_image_urls, product_id):
+def save_to_csv(title, category, price, main_image_url, all_image_urls, product_id):
     with open("product_info.csv", "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["Title", "Category", "Main Image URL", "Other Image URLs", "ID"])
+        writer.writerow(["Title", "Category", "Price", "Main Image URL", "Other Image URLs", "ID"])
 
         # Записываем данные в строку CSV файла
-        writer.writerow([title, category, main_image_url, ', '.join(all_image_urls), product_id])
+        writer.writerow([title, category, price, main_image_url, ', '.join(all_image_urls), product_id])
 
     print("Информация о товаре успешно записана в файл product_info.csv.")
 
@@ -315,6 +315,10 @@ print('Title: ', title)
 # Найти категорию товара
 category = 'Home Fragrance | Room Diffuser'
 print('Category: ', category)
+
+# Найти цену товара
+price = soup.find("span", class_="price").text.replace('₹', '').strip()
+print('Price: ', price)
 
 # Находим тег div с классом "fotorama__stage__frame" (предполагаем, что это главное фото товара)
 main_image_tag = soup.find("div", class_="fotorama__stage__frame")
@@ -383,7 +387,7 @@ else:
     product_id = "Тег с классом 'fotorama__caption__wrap' не найден."
 
 # Сохраняем данные в файл CSV
-save_to_csv(title, category, main_image_url, all_large_or_medium_image_urls, product_id)
+save_to_csv(title, category, price, main_image_url, all_large_or_medium_image_urls, product_id)
 
 
 #------------------------------------------------------------------
