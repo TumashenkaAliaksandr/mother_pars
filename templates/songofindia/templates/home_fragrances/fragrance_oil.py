@@ -170,6 +170,7 @@ import csv
 import textwrap
 
 
+# Функция для сохранения данных в файл CSV
 def save_to_csv(title, category, price, description, description_all, main_image_url, all_image_urls, product_id):
     with open("../../done_csv/fragrance_oil.csv", "a", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
@@ -178,6 +179,8 @@ def save_to_csv(title, category, price, description, description_all, main_image
         writer.writerow(
             [title, category, price, description, description_all, main_image_url, ', '.join(all_image_urls),
              product_id])
+
+    print("Информация о товаре успешно записана в файл fragrance_oil.csv.")
 
     print("Информация о товаре успешно записана в файл product_info.csv.")
 
@@ -232,8 +235,10 @@ with open('../../urls_csv/urls_fragrance_oil.csv', 'r', encoding='utf-8') as fil
                 wrapped_description = textwrap.fill(description, width=100, break_long_words=False)
                 print('Descriptions: ', wrapped_description)
             else:
+                description = ""  # Установите пустое описание
                 print("Описание товара не найдено.")
         else:
+            description = ""  # Установите пустое описание
             print("Элемент с описанием товара не найден.")
 
 
