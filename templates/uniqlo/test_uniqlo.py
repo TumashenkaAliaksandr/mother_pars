@@ -21,7 +21,7 @@ while True:
     pending_requests = [request for request in network_requests if request.response is None]
     if not pending_requests:
         break
-    time.sleep(1)
+    time.sleep(5)
 
 # Получение ссылок на товары
 product_links = []
