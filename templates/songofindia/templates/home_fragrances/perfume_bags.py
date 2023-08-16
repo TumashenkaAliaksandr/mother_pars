@@ -168,21 +168,28 @@ from PIL import Image
 from io import BytesIO
 import csv
 import textwrap
-
+import os
 
 # Функция для сохранения данных в файл CSV
 def save_to_csv(title, category, subcategory, price, description, description_all, main_image_url, all_image_urls, product_id):
-    with open("../../done_csv/perfume_bags.csv", "a", newline="", encoding="utf-8") as csvfile:
+    with open(csv_file_path, "a", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
 
         # Записываем данные в строку CSV файла
-        writer.writerow(
-            [title, category, subcategory, price, description, description_all, main_image_url, ', '.join(all_image_urls),
-             product_id])
+        writer.writerow([title, category, subcategory, price, description, description_all, main_image_url, ', '.join(all_image_urls), product_id])
 
+# Путь к файлу CSV
+csv_file_path = "../../done_csv/perfume_bags.csv"
+
+# Проверяем, существует ли файл или пустой ли он
+if not os.path.exists(csv_file_path) or os.path.getsize(csv_file_path) == 0:
+    with open(csv_file_path, "a", newline="", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        header = ["Title", "Category", "Subcategory", "Price", "Description", "Description_All", "Main_Image_URL", "All_Image_URLs", "Product_ID"]
+        writer.writerow(header)
 
 # Путь к драйверу Chrome (загрузите драйвер, совместимый с вашей версией Chrome)
-chrome_driver_path = "путь_к_драйверу_chrome"
+chrome_driver_path = "webdrivers\chromedriver.exe"
 
 # Создаем экземпляр объекта Service
 service = ChromeService(executable_path=chrome_driver_path)
@@ -234,11 +241,11 @@ with open('../../urls_csv/urls_perfume_bags.csv', 'r', encoding='utf-8') as file
                 wrapped_description = textwrap.fill(description, width=100, break_long_words=False)
                 print('Descriptions: ', wrapped_description)
             else:
-                description = ""  # Установите пустое описание
-                print("Описание товара не найдено.")
+                description = ""
+                print(" ")
         else:
-            description = ""  # Установите пустое описание
-            print("Элемент с описанием товара не найден.")
+            description = ""
+            print(" ")
 
 
         # Итерироваться по строкам таблицы и собрать текст из всех ячеек в одну переменную
@@ -258,7 +265,7 @@ with open('../../urls_csv/urls_perfume_bags.csv', 'r', encoding='utf-8') as file
                     print(wrapped_text)
                 print()
         else:
-            print("Таблица с данными не найдена.")
+            print(" ")
 
         # Находим тег div с классом "fotorama__stage__frame" (предполагаем, что это главное фото товара)
         main_image_tag = soup.find("div", class_="fotorama__stage__frame")
@@ -270,9 +277,9 @@ with open('../../urls_csv/urls_perfume_bags.csv', 'r', encoding='utf-8') as file
                 main_image_url = img_tag.get("href") or img_tag.get("src")
                 print("Ссылка на главное фото товара:", main_image_url)
             else:
-                main_image_url = "Ссылка на фото товара не найдена."
+                main_image_url = " "
         else:
-            main_image_url = "Главное фото товара не найдено."
+            main_image_url = " "
 
         # Продолжение кода после получения главного фото
 
@@ -322,9 +329,9 @@ with open('../../urls_csv/urls_perfume_bags.csv', 'r', encoding='utf-8') as file
                 product_id = product_id[0]
                 print("ID товара:", product_id)
             else:
-                product_id = "ID товара не найден."
+                product_id = " "
         else:
-            product_id = "Тег с классом 'fotorama__caption__wrap' не найден."
+            product_id = " "
 
         # После обработки страницы, сохраняем данные в файл CSV
         save_to_csv(title, category, subcategory, price, description, description_all, main_image_url, all_large_or_medium_image_urls, product_id)
