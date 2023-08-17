@@ -19,7 +19,7 @@ def save_to_csv(title, category, subcategory, price, description, description_al
         writer.writerow([title, category, subcategory, price, description, description_all, main_image_url, ', '.join(all_image_urls), product_id])
 
 # Путь к файлу CSV
-csv_file_path = "../../done_csv/perfume_bags.csv"
+csv_file_path = "../../done_csv/refill.csv"
 
 # Проверяем, существует ли файл или пустой ли он
 if not os.path.exists(csv_file_path) or os.path.getsize(csv_file_path) == 0:
@@ -41,7 +41,7 @@ chrome_options.add_argument("--headless")  # Запускаем в безгол�
 # Создаем экземпляр браузера Chrome
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
-with open('../../urls_csv/urls_perfume_bags.csv', 'r', encoding='utf-8') as file:
+with open('../../urls_csv/urls_refill.csv', 'r', encoding='utf-8') as file:
     for line in csv.DictReader(file):
         url = line['url']
 
@@ -65,7 +65,7 @@ with open('../../urls_csv/urls_perfume_bags.csv', 'r', encoding='utf-8') as file
         category = 'Home Fragrance'
         print('Category: ', category)
 
-        subcategory = 'Perfume Bag'
+        subcategory = 'Diffuser Refill'
         print('Subcategory:', subcategory)
 
         # Найти цену товара
