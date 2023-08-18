@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-base_url = "https://www.songofindia.co.in/index.php/perfume/eau-de-parfum.html?p="
+base_url = "https://www.songofindia.co.in/index.php/perfume/perfume-oil-ittar.html?p="
 page_num = 1
 links = []
 
@@ -23,10 +23,10 @@ while True:
 
     page_num += 1
 
-with open("../../urls_csv/urls_eau_de_parfum.csv", "w", newline="") as csvfile:
+with open("../../urls_csv/urls_perfume_oil_ittar.csv", "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["url"])
     for link in links:
         writer.writerow([link])
 
-print("Ссылки на товары успешно записаны в файл urls_eau_de_parfum.csv.")
+print("Ссылки на товары успешно записаны в файл urls_perfume_oil_ittar.csv.")
