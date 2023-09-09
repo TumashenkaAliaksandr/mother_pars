@@ -1,14 +1,13 @@
-# # https://www.abhishti.com/
 import requests
 from bs4 import BeautifulSoup
 import csv
 
-base_url = "https://www.abhishti.com/collections/new-arrival-men?p="
+base_url = "https://www.abhishti.com/collections/new-arrival-men"
 page_num = 1
 links = []
 
 while True:
-    url = base_url + str(page_num)
+    url = f"{base_url}?page={page_num}"
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
 
@@ -17,7 +16,7 @@ while True:
     for div in product_divs:
         link = div.find("a")["href"]
         # Добавьте "https://" к каждой ссылке
-        full_link = "https:/" + link
+        full_link = "https://www.abhishti.com" + link
         links.append(full_link)
 
     next_link = soup.find("a", class_="next")
