@@ -61,3 +61,24 @@ for element in text_elements:
     # Split the text into lines with a maximum width of 100 characters
     wrapped_text = textwrap.fill(text, width=100)
     print(wrapped_text)
+
+
+# Находим все элементы с классом 'product__media-item'
+media_items = soup.find_all('div', {'class': 'product__media-item'})
+
+# Создаем список для хранения URL-адресов изображений
+image_urls = []
+
+# Итерируемся по найденным элементам и извлекаем URL-адреса изображений
+for media_item in media_items:
+    image_tag = media_item.find('img')
+    if image_tag:
+        image_url = image_tag.get('src')
+        # Убираем лишние слеши из URL-адреса
+        if image_url.startswith('//'):
+            image_url = image_url[2:]
+        image_urls.append(image_url)
+
+# Печатаем URL-адреса изображений
+for idx, image_url in enumerate(image_urls):
+    print(f'Image {idx + 1}: {image_url}')
