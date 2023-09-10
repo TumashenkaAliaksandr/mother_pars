@@ -1,3 +1,5 @@
+import textwrap
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -45,3 +47,17 @@ all_text = div_element.get_text()
 
 # Выводим весь текст
 print('Description:', '\n', all_text)
+
+
+# Find the div with the ID 'product-7218630098992-content'
+product_content = soup.find('div', {'id': 'product-7218630098992-content'})
+
+# Find all the text within the 'product-tabs__tab-item-content' divs
+text_elements = product_content.find_all('div', {'class': 'product-tabs__tab-item-content'})
+
+# Extract and print the text with word wrapping
+for element in text_elements:
+    text = element.get_text()
+    # Split the text into lines with a maximum width of 100 characters
+    wrapped_text = textwrap.fill(text, width=100)
+    print(wrapped_text)
