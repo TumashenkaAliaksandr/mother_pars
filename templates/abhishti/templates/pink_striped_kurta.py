@@ -35,3 +35,13 @@ values = [input_element['value'] for input_element in input_elements]
 # Выводим полученные значения "value"
 for value in values:
     print('Size:', value)
+
+
+# Находим элемент <div> с классом "product-tabs__tab-item-content" и извлекаем его текст
+div_element = soup.find('div', class_='product-tabs__tab-item-content')
+
+# Извлекаем весь текст из элемента
+all_text = div_element.get_text()
+
+# Выводим весь текст
+print('Description:', '\n', all_text)
