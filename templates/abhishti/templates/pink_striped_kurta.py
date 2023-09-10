@@ -25,3 +25,13 @@ aria_labels = [a['aria-label'] for a in soup.find_all('a', class_='pl-swatches__
 # Выводим полученные значения "aria-label"
 for label in aria_labels:
     print('Color:', label)
+
+# Находим элементы <input> с классом "block-swatch__radio" и извлекаем их атрибут "value"
+input_elements = soup.find_all('input', class_='block-swatch__radio')
+
+# Создаем список для хранения значений атрибута "value"
+values = [input_element['value'] for input_element in input_elements]
+
+# Выводим полученные значения "value"
+for value in values:
+    print('Size:', value)
