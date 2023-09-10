@@ -18,3 +18,10 @@ price = price.replace("Sale price₹", "").strip()
 
 print("Заголовок:", title)
 print("Цена:", price)
+
+# Находим все элементы с классом "pl-swatches__link" и извлекаем их атрибут "aria-label"
+aria_labels = [a['aria-label'] for a in soup.find_all('a', class_='pl-swatches__link')]
+
+# Выводим полученные значения "aria-label"
+for label in aria_labels:
+    print('Color:', label)
