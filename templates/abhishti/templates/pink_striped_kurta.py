@@ -1,4 +1,5 @@
 import csv
+import re
 import textwrap
 import requests
 from bs4 import BeautifulSoup
@@ -71,11 +72,17 @@ img_element = soup.find(attrs={"data-media-id": True})
 if img_element:
     # Получаем значение атрибута data-media-id
     data_media_id = img_element['data-media-id']
-    print("Значение атрибута data-media-id:", data_media_id)
+
+    # Используем регулярное выражение для извлечения только цифр
+    digits = re.search(r'\d+', data_media_id)
+
+    if digits:
+        digits_value = digits.group()
+        print("Значение атрибута data-media-id (только цифры):", digits_value)
+    else:
+        print("Цифры в атрибуте data-media-id не найдены.")
 else:
     print("Элемент с атрибутом data-media-id не найден.")
-
-
 # Создаем файл CSV и записываем данные
 with open("product_data.csv", "w", newline="", encoding="utf-8") as csvfile:
     csvwriter = csv.writer(csvfile)
@@ -83,6 +90,6 @@ with open("product_data.csv", "w", newline="", encoding="utf-8") as csvfile:
     csvwriter.writerow(["Title", "Price", "Colors", "Size", "Description", "URL- image", 'id'])
 
     # Записываем данные
-    csvwriter.writerow([title, price, ', '.join(aria_labels), ', '.join(values), all_text, '\n'.join(image_urls), img_element])
+    csvwriter.writerow([title, price, ', '.join(aria_labels), ', '.join(values), all_text, '\n'.join(image_urls), digits_value])
 
 print("Данные сохранены в product_data.csv")
