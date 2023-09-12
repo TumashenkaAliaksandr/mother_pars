@@ -83,6 +83,6 @@ with open("product_data.csv", "w", newline="", encoding="utf-8") as csvfile:
     csvwriter.writerow(["Title", "Price", "Colors", "Size", "Description", "URL- image", 'id'])
 
     # Записываем данные
-    csvwriter.writerow([title, price, ', '.join(aria_labels), ', '.join(values), all_text, '\n'.join(image_urls)])
+    csvwriter.writerow([title, price, ', '.join(aria_labels), ', '.join(values), all_text, '\n'.join(image_urls), img_element])
 
 print("Данные сохранены в product_data.csv")
