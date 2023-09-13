@@ -10,7 +10,7 @@ with open('../urls_csv/urls_new_arrival_men.csv', 'r', encoding='utf-8') as file
     with open("../done_csv/product_data.csv", "w", newline="", encoding="utf-8") as csvfile:
         csvwriter = csv.writer(csvfile)
         # Записываем заголовки
-        csvwriter.writerow(["Title", "Price", "Colors", "Size", "Description", "URL- image", 'id'])
+        csvwriter.writerow(["Title", "Price", "Category", "Sex", "Brand", "Colors", "Size", "Description", "URL- image", 'id'])
 
     # Итерируемся по строкам файла
     for line in csv.DictReader(file):
@@ -24,6 +24,10 @@ with open('../urls_csv/urls_new_arrival_men.csv', 'r', encoding='utf-8') as file
         # Парсинг заголовка (title)
         title_element = soup.find("h1", class_="product-meta__title heading h3")
         title = title_element.text.strip() if title_element else "Заголовок не найден"
+
+        category = 'New Arrivals'
+        sex = 'Man'
+        brand = 'Blue Hour'
 
         # Парсинг цены
         price_element = soup.find("span", class_="price")
@@ -106,6 +110,6 @@ with open('../urls_csv/urls_new_arrival_men.csv', 'r', encoding='utf-8') as file
             csvwriter = csv.writer(csvfile)
             # Записываем данные
             csvwriter.writerow(
-                [title, price, ', '.join(aria_labels), ', '.join(values), all_text, '\n'.join(image_urls), digits_value])
+                [title, price, category, sex, brand, ', '.join(aria_labels), ', '.join(values), all_text, '\n'.join(image_urls), digits_value])
 
         print("Данные сохранены в product_data.csv")
