@@ -84,7 +84,7 @@ if img_element:
 else:
     print("Элемент с атрибутом data-media-id не найден.")
 # Создаем файл CSV и записываем данные
-with open("product_data.csv", "w", newline="", encoding="utf-8") as csvfile:
+with open("../done_csv/product_data.csv", "w", newline="", encoding="utf-8") as csvfile:
     csvwriter = csv.writer(csvfile)
     # Записываем заголовки
     csvwriter.writerow(["Title", "Price", "Colors", "Size", "Description", "URL- image", 'id'])
