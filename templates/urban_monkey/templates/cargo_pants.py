@@ -172,11 +172,12 @@
 # if __name__ == '__main__':
 #     main()
 
-
 import os
 import requests
 from bs4 import BeautifulSoup
 import csv
+import re
+import json
 
 
 def format_description(description, max_line_length=100):
@@ -206,6 +207,42 @@ def create_csv(filename, order):
 def write_data_csv(filename, data):
     with open(filename, 'a', encoding='utf-8', newline='') as file:
         csv.DictWriter(file, fieldnames=list(data)).writerow(data)
+
+
+def extract_id_from_script(html):
+    script_text = re.search(r'<script type="application/json" class="pr_variants_json">(.*?)</script>', html, re.DOTALL)
+
+    if script_text:
+        script_content = script_text.group(1)
+        script_data = json.loads(script_content)
+
+        ids = [variant['id'] for variant in script_data]
+        return ids
+    else:
+        return None
+
+
+def extract_image_src(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    img_elements = soup.find_all("div", class_="t4s-product__media")
+
+    image_src_list = []
+
+    for img_element in img_elements:
+        img = img_element.find("img")
+        if img and "src" in img.attrs:
+            image_src = img["src"]
+            # Удаляем первые два символа "//" перед "www" и часть "?v=1697874194&width=720"
+            fixed_url = image_src[2:].split('?v=')[0]
+            image_src_list.append(fixed_url)
+
+    return image_src_list
+
+
+def write_image_src_to_file(image_src_list, filename):
+    with open(filename, 'w', encoding='utf-8') as file:
+        for src in image_src_list:
+            file.write(src + '\n')
 
 
 def get_data(url, filename):
@@ -250,7 +287,20 @@ def get_data(url, filename):
     print("Care Guide:")
     print(care_guide_text)
 
-    # Записываем данные в файл CSV
+    ids = extract_id_from_script(html)
+    if ids:
+        print("IDs:")
+        for variant_id in ids:
+            print(variant_id)
+
+    image_src_list = extract_image_src(html)
+    if image_src_list:
+        print("Image Sources:")
+        for src in image_src_list:
+            print(src)
+
+        write_image_src_to_file(image_src_list, "image_src.txt")
+
     data = {
         "Title": title,
         "Category": category,
@@ -258,14 +308,15 @@ def get_data(url, filename):
         "Core Features": core_features_text,
         "Description": formatted_description,
         "Shipping & Returns": shipping_returns_text,
-        "Care Guide": care_guide_text
+        "Care Guide": care_guide_text,
+        "Photo Url": src,
     }
     write_data_csv(filename, data)
 
 
 def process_urls_csv(input_csv, output_csv):
     create_csv(output_csv,
-               ["Title", "Category", "Price", "Core Features", "Description", "Shipping & Returns", "Care Guide"])
+               ["Title", "Category", "Price", "Core Features", "Description", "Shipping & Returns", "Care Guide", "Photo Url"])
 
     with open(input_csv, 'r', encoding='utf-8') as file:
         for line in csv.DictReader(file):
@@ -278,3 +329,4 @@ if __name__ == "__main__":
     output_csv = 'cargo_pants.csv'
 
     process_urls_csv(input_csv, output_csv)
+
