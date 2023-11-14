@@ -165,5 +165,3 @@ if __name__ == "__main__":
     output_csv = '../done_csv/cargo_pants.csv'
 
     process_urls_csv(input_csv, output_csv)
-
-
