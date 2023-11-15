@@ -35,3 +35,17 @@ price_element = soup.find("p", class_="f8pr-price s1pr")
 current_price = price_element.find("span", class_="cvc-money").find("span", class_="money").text.strip()
 
 print("Current Price:", current_price)
+
+div_tag = soup.find('div', class_='m6lm')
+
+if div_tag:
+    p_tag = div_tag.find('p')
+    if p_tag:
+        text = p_tag.text.strip()
+        if '•' in text:
+            text = '\n'.join(line.strip() for line in text.split('•') if line.strip())
+        print(text)
+    else:
+        print("No <p> tag found inside the div.")
+else:
+    print("No <div> tag with specified class found.")
