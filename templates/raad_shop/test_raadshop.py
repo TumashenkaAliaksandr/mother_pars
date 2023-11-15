@@ -30,3 +30,8 @@ header = soup.find("header", class_="mobile-hide")
 title = header.find("h2", class_="m5 mob-h2").text.strip()
 
 print("Title:", title)
+
+price_element = soup.find("p", class_="f8pr-price s1pr")
+current_price = price_element.find("span", class_="cvc-money").find("span", class_="money").text.strip()
+
+print("Current Price:", current_price)
