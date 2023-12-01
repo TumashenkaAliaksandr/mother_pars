@@ -13,7 +13,7 @@ def get_sizes(soup):
     return sizes
 
 # Чтение URL из CSV-файла
-with open('urls_csv/urls_csv_test.csv', mode='r', encoding='utf-8') as csv_file:
+with open('../urls_csv/urls_csv_test.csv', mode='r', encoding='utf-8') as csv_file:
     csv_reader = csv.DictReader(csv_file)
     for row in csv_reader:
         url = row['url']
@@ -80,7 +80,7 @@ if div_tag:
             print('Description:', text)
 
 # Запись параметров в CSV-файл
-with open('done_csv/product_details.csv', mode='w', newline='', encoding='utf-8') as file:
+with open('../done_csv/done_shoes_high_tops.csv', mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(
         [
