@@ -8,19 +8,16 @@ response = requests.get(url)
 soup = BeautifulSoup(response.content, "html.parser")
 
 header = soup.find("header", class_="mobile-hide")
-title = header.find("h2", class_="m5 mob-h2").text.strip()
+title = header.find("h2", class_="m5 mob-h2").text.strip() if header else ''
 
 price_element = soup.find("p", class_="f8pr-price s1pr")
-current_price = price_element.find("span", class_="cvc-money").find("span", class_="money").text.strip()
+current_price = price_element.find("span", class_="cvc-money").find("span", class_="money").text.strip() if price_element else ''
 
 category = 'Shoes'
 style = "Men's High Tops"
 
 label_element = soup.find("span", class_="data-change-to-option-template--14771537444967__main-product-1")
-
-if label_element:
-    color_sh = label_element.text.strip()
-    print(color_sh)
+color_sh = label_element.text.strip() if label_element else ''
 
 div_tag = soup.find('div', class_='m6lm')
 
