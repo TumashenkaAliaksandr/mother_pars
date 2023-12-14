@@ -20,6 +20,7 @@ The code is written in Python, and the project uses popular libraries, such as B
 along with the following libraries:*
 ***
     Beautiful Soup
+    Selenium
     Selectolax
     Requests
 ***
