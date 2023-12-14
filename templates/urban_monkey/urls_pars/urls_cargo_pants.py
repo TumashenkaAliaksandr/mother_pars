@@ -23,7 +23,7 @@ while True:
 
     page_num += 1
 
-with open("urls_csv/urls_urban_monkey.csv", "w", newline="") as csvfile:
+with open("../urls_csv/urls_urban_monkey.csv", "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["url"])
     for link in links:
