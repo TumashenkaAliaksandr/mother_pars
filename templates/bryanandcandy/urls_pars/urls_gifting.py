@@ -23,7 +23,7 @@ for link in product_links:
 
 
 # Записываем ссылки в CSV файл
-with open('bryanandcandy_links.csv', mode='w', newline='', encoding='utf-8') as file:
+with open('../urls_csv/bryanandcandy_links.csv', mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(['url'])
     for link in product_links:
