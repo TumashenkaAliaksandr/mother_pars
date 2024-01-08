@@ -18,8 +18,8 @@ def get_product_id(url):
     return generate_numeric_id()
 
 # Чтение ссылок из CSV файла и обработка
-input_file = '../urls_csv/best_body_butter_in_india_links.csv'
-output_file = '../done_csv/best_body_butter_in_india.csv'
+input_file = '../urls_csv/body_scrub_for_glowing_skin_links.csv'
+output_file = '../done_csv/body_scrub_for_glowing_skin.csv'
 
 with open(input_file, mode='r', newline='', encoding='utf-8') as file:
     reader = csv.reader(file)
@@ -44,7 +44,7 @@ with open(input_file, mode='r', newline='', encoding='utf-8') as file:
                 cost_text = cost.text.strip().replace('Rs.', '')
                 description_text = description.text.strip()
                 brand = 'Bryan & Candy'
-                category = "Body Butter"
+                category = "Body Scrub"
 
                 photos = []
                 for link in soup.find_all('a', class_='Product__SlideshowNavImage'):
@@ -59,4 +59,4 @@ with open(input_file, mode='r', newline='', encoding='utf-8') as file:
             else:
                 writer.writerow(['', '', '', '', '', '', 'ID продукта не найден или информация о товаре отсутствует'])
 
-print('Информация успешно записана в best_body_butter_in_india.csv')
+print('Информация успешно записана в body_scrub_for_glowing_skin.csv')

@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import csv
 
 # Получаем HTML-код страницы
-url = 'https://bryanandcandy.com/collections/best-body-butter-in-india'
+url = 'https://bryanandcandy.com/collections/foaming-body-wash'
 response = requests.get(url)
 soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -23,7 +23,7 @@ for link in product_links:
 
 
 # Записываем ссылки в CSV файл
-with open('../urls_csv/best_body_butter_in_india_links.csv', mode='w', newline='', encoding='utf-8') as file:
+with open('../urls_csv/foaming_body_wash_links.csv', mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(['url'])
     for link in product_links:
