@@ -53,6 +53,14 @@ def get_product_info(url):
     print("Ссылки на фотографии:")
     print(photos[:3])
 
+    # Ссылка для исключения
+    url_to_exclude = 'https://www.camveda.com/cdn/shop/files/Logo_Gold_Camveda_New-01.png'
+
+    # Проверка наличия ссылки в списке фотографий
+    if url_to_exclude in photos:
+        print(f"Ссылка '{url_to_exclude}' найдена в списке фотографий. Исключаем её.")
+        photos.remove(url_to_exclude)
+
     # Генерируем рандомный ID
     product_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
     print("Product ID:", product_id)
@@ -61,7 +69,7 @@ def get_product_info(url):
         'Product ID': product_id,
         'Title': title,
         'Description': description,
-        'Image URLs': ', '.join(photos[:3]),  # Ссылки на три фотографии в одной строке
+        'Image URLs': ', '.join(photos[:1]),  # Ссылки на три фотографии в одной строке
         'Price': sale_price,
     }
 
