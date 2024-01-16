@@ -15,8 +15,8 @@ if response.status_code == 200:
         product_links.add(full_link)
 
     # Записываем найденные ссылки в файл CSV
-    with open('product_links.csv', 'w', newline='', encoding='utf-8') as csvfile:
-        fieldnames = ['Product_Link']
+    with open('../urls_csv/viandash_links.csv', 'w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = ['url']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         # Записываем заголовок
@@ -24,7 +24,7 @@ if response.status_code == 200:
 
         # Записываем ссылки
         for full_link in product_links:
-            writer.writerow({'Product_Link': full_link})
+            writer.writerow({'url': full_link})
 
         print("Ссылки успешно записаны в файл product_links.csv")
 else:
