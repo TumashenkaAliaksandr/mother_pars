@@ -1,4 +1,6 @@
 import re
+from urllib.parse import urlparse
+
 import requests
 from bs4 import BeautifulSoup
 import csv
@@ -74,6 +76,8 @@ with open(input_file, mode='r', newline='', encoding='utf-8') as file:
             brand = 'Vi & Ash'
             print(brand)
 
+            # ... (остальной код)
+
             photos = []
             media_div = soup.find('div',
                                   class_='product__media media media--transparent gradient global-media-settings')
@@ -85,8 +89,13 @@ with open(input_file, mode='r', newline='', encoding='utf-8') as file:
                     if srcset_attribute:
                         src_values = srcset_attribute.split(', ')
                         if src_values:
-                            src_value = src_values[0].split(' ')[0].replace('//', '')  # Берем первое значение в srcset
-                            photos.append(src_value)
+                            src_value = src_values[0].split(' ')[0]  # Берем первое значение в srcset
+
+                            # Используем urlparse для извлечения чистого URL без параметров запроса
+                            parsed_url = urlparse(src_value)
+                            base_url = parsed_url.scheme + '' + parsed_url.netloc + parsed_url.path
+
+                            photos.append(base_url)
                             print(photos)
                         else:
                             print("No src values found in srcset.")
