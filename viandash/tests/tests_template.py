@@ -93,7 +93,7 @@ with open(input_file, mode='r', newline='', encoding='utf-8') as file:
 
                             # Используем urlparse для извлечения чистого URL без параметров запроса
                             parsed_url = urlparse(src_value)
-                            base_url = parsed_url.scheme + '' + parsed_url.netloc + parsed_url.path
+                            base_url = parsed_url.scheme + 'https://' + parsed_url.netloc + parsed_url.path
 
                             photos.append(base_url)
                             print(photos)
