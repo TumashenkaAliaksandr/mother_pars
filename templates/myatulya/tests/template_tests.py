@@ -26,12 +26,16 @@ finally:
 if html_code:
     soup = BeautifulSoup(html_code, 'html.parser')
 
-    # Генерируем рандомный идентификатор для товара
-    product_id = str(uuid.uuid4())
-    print('Product ID: ', product_id)
+    # Генерируем случайный идентификатор UUID
+    uuid_str = str(uuid.uuid4())
+    # Оставляем только цифры
+    digits = ''.join(filter(str.isdigit, uuid_str))
+    # Ограничиваем количество символов до 8
+    product_id = digits[:8]
+    print('Product ID:', product_id)
 
     # Извлекаем заголовок товара
-    title = soup.find('h1', class_='product-single__title').text.strip()
+    title = soup.find('h1', class_='product-single__title').text.strip().capitalize()
     print('Title: ', title)
 
     brand = 'Atulya'
