@@ -42,7 +42,7 @@ if html_code:
     category = 'HOT DEALS'
 
     # Извлекаем цену товара, добавляем проверку наличия элемента
-    price_element = soup.find('span', class_='product__price on-sale')
+    price_element = soup.find('span', class_='product__price')
     price = price_element.text.strip().replace('Rs. ', '').split('.')[0] if price_element else "Цена не указана"
     print('Price: ', price)
 

@@ -4,7 +4,7 @@ import csv
 from urllib.parse import urljoin
 
 url_base = "https://myatulya.com"
-url = url_base + "/collections/hot-deals"
+url = url_base + "/collections/face-wash"
 
 response = requests.get(url)
 
@@ -26,7 +26,7 @@ if response.status_code == 200:
         product_links.append(full_url)
 
     # Записываем ссылки в CSV файл
-    with open('product_links.csv', 'w', newline='') as csvfile:
+    with open('../urls_csv/face_wash_links.csv', 'w', newline='') as csvfile:
         fieldnames = ['url']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
