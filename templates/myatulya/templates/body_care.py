@@ -7,7 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 directory = '../done_csv'
-filename = 'myatulya_skin_care.csv'
+filename = 'myatulya_body_care.csv'
 FILEPARAMS = os.path.join(directory, filename)
 
 def create_csv(filename, order):
@@ -50,8 +50,8 @@ def get_data(url):
             print('Title: ', title)
 
             brand = 'Atulya'
-            category = 'SKIN CARE'
-            subcategory = 'SKIN CARE'
+            category = 'BODY CARE'
+            subcategory = 'BODY CARE'
 
             # Извлекаем цену товара, добавляем проверку наличия элемента
             price_element = soup.find('span', class_='product__price')
@@ -120,7 +120,7 @@ def get_data(url):
         print(f"Произошла ошибка при обработке URL {url}: {e}")
 
 # Считываем URL из файла и обрабатываем каждый из них
-urls_filename = '../urls_csv/skin_care_links.csv'  # Укажите имя вашего файла с URL
+urls_filename = '../urls_csv/body_care_links.csv'  # Укажите имя вашего файла с URL
 with open(urls_filename, 'r', encoding='utf-8') as urls_file:
     urls = [line.strip() for line in urls_file]
 
