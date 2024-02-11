@@ -63,7 +63,7 @@ def get_product_data(url):
     return {'Brand': brand, 'Title': title, 'Price': price, 'Mass': mass, 'Description': description, 'Photo': photo, 'ID': product_id, 'url_product': url_list}
 
 def main():
-    order = ['Brand', 'Title', 'Price', 'Description', 'Photo', 'ID', 'Url_Product']
+    order = ['Brand', 'Title', 'Price', 'Mass', 'Description', 'Photo', 'ID', 'Url_Product']
     create_csv(FILEPARAMS, order)
     urls_filename = '../urls_csv/honeyhut_urls.csv'
     with open(urls_filename, 'r', encoding='utf-8') as urls_file:
