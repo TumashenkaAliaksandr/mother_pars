@@ -28,13 +28,13 @@
 #         print(f"Не удалось получить страницу {url}")
 #         break
 #
-# with open("product_links.csv", "w", newline="", encoding='utf-8') as csvfile:
+# with open("honeyhut_urls.csv", "w", newline="", encoding='utf-8') as csvfile:
 #     writer = csv.writer(csvfile)
 #     writer.writerow(["url"])
 #     for link in links:
 #         writer.writerow([link])
 #
-# print("Ссылки на товары успешно записаны в файл product_links.csv.")
+# print("Ссылки на товары успешно записаны в файл honeyhut_urls.csv.")
 
 
 import requests

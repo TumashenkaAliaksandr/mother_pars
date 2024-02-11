@@ -31,6 +31,6 @@ def save_to_csv(links, filename):
 url = 'https://www.honeyhut.in/collections/all'
 product_links = extract_product_links(url)
 
-csv_filename = '../urls_csv/product_links.csv'
+csv_filename = '../urls_csv/honeyhut_urls.csv'
 save_to_csv(product_links, csv_filename)
 print(f"Ссылки успешно сохранены в файл '{csv_filename}'")

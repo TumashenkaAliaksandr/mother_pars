@@ -39,7 +39,7 @@ with open('templates/../../urls_csv/test_pick_printed_t_shirts.csv', 'w', newlin
     for link in product_links:
         writer.writerow({'url': link})
 
-print("Ссылки на товары были успешно записаны в файл 'product_links.csv'.")
+print("Ссылки на товары были успешно записаны в файл 'honeyhut_urls.csv'.")
 
 # Закрытие веб-драйвера
 driver.quit()

@@ -26,4 +26,4 @@ with open('product_links.csv', 'w', newline='', encoding='utf-8') as file:
     for product_link in product_links:
         writer.writerow([product_link])
 
-print("Ссылки на товары были сохранены в файл 'product_links.csv'.")
+print("Ссылки на товары были сохранены в файл 'honeyhut_urls.csv'.")

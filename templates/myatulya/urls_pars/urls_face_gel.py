@@ -34,6 +34,6 @@ if response.status_code == 200:
         for link in product_links:
             writer.writerow({'url': link})
 
-    print("Ссылки успешно записаны в файл product_links.csv")
+    print("Ссылки успешно записаны в файл honeyhut_urls.csv")
 else:
     print("Не удалось получить доступ к странице. Код состояния:", response.status_code)

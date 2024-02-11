@@ -116,7 +116,7 @@ import csv
 # import csv
 #
 # URL = 'https://renaindia.com/collections'
-# FILE_NAME = 'product_links.csv'
+# FILE_NAME = 'honeyhut_urls.csv'
 # DATA_FILE_NAME = 'products.csv'
 #
 #
