@@ -27,8 +27,9 @@ sizes = '|'.join([size.text.strip() for size in sizes_container.find_all('a', {'
 description_block = soup.find('div', class_='description')
 descriptions = '\n'.join([description.text.strip() for description in description_block.find_all('p')])
 brand = 'Groovee'
-category = soup.find('div', {'class': 'product-brand-wrap mb-2'}).find('span', recursive=False).text.strip()
-print(category)
+category = 'Oversized T-shirts'
+sub_category = soup.find('div', {'class': 'product-brand-wrap mb-2'}).find('span', recursive=False).text.strip()
+
 
 # Извлекаем URL-адреса лучших фотографий товара (размером 1800)
 photo_gallery = soup.find_all('img', class_='feature-image')
@@ -42,8 +43,8 @@ for photo in photo_gallery:
 # Создаем CSV файл и записываем данные
 with open('groovee_product_details.csv', 'w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow(['Product ID', 'Brand', 'Solid By', 'Title', 'Price', 'Sizes', 'Description', 'Photo URLs', 'URL_Product'])
-    writer.writerow([product_id, brand, category, title, price, sizes, descriptions, ' '.join(best_photo_urls), url])
+    writer.writerow(['Product ID', 'Brand', 'Category', 'Solid By', 'Title', 'Price', 'Sizes', 'Description', 'Photo URLs', 'URL_Product'])
+    writer.writerow([product_id, brand, category, sub_category, title, price, sizes, descriptions, ' '.join(best_photo_urls), url])
 
 # Закрываем браузер после использования
 driver.quit()
