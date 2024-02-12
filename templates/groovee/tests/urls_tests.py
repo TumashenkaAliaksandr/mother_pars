@@ -23,7 +23,7 @@ for link in links:
         product_links.add(urllib.parse.urljoin(url, link['href']))
 
 # Записываем найденные ссылки в файл CSV
-with open('product_links.csv', 'w', newline='') as csvfile:
+with open('../urls_csv/urls_groovee_tsh.csv', 'w', newline='') as csvfile:
     fieldnames = ['Link']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
