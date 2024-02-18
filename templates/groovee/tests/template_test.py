@@ -44,7 +44,7 @@ for photo in photo_gallery:
 with open('groovee_product_details.csv', 'w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(['Product ID', 'Brand', 'Category', 'Solid By', 'Title', 'Price', 'Sizes', 'Description', 'Photo URLs', 'URL_Product'])
-    writer.writerow([product_id, brand, category, sub_category, title, price, sizes, descriptions, ' '.join(best_photo_urls), url])
+    writer.writerow([product_id, brand, category, sub_category, title, price, sizes, descriptions, ', '.join(best_photo_urls), url])
 
 # Закрываем браузер после использования
 driver.quit()
