@@ -45,7 +45,12 @@ with open('../urls_csv/urls_groovee_tsh.csv', 'r', newline='', encoding='utf-8')
         descriptions = '\n'.join([description.text.strip() for description in description_block.find_all('p')])
         brand = 'Groovee'
         category = 'Oversized T-shirts'
-        sub_category = soup.find('div', {'class': 'product-brand-wrap mb-2'}).find('span', recursive=False).text.strip()
+        # Извлекаем подкатегорию товара
+        sub_category_element = soup.find('div', {'class': 'product-brand-wrap mb-2'})
+        if sub_category_element:
+            sub_category = sub_category_element.find('span', recursive=False).text.strip()
+        else:
+            sub_category = 'N/A'
 
         # Извлекаем URL-адреса лучших фотографий товара (размером 1800)
         photo_gallery = soup.find_all('img', class_='feature-image')
