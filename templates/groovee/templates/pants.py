@@ -3,15 +3,16 @@ import random
 import string
 from selenium import webdriver
 from bs4 import BeautifulSoup
+import urllib.parse
 import time
 
 # Записываем заголовки столбцов в CSV файл
-with open('../done_csv/groovee_anime.csv', 'w', newline='', encoding='utf-8') as csvfile:
+with open('../done_csv/groovee_pants.csv', 'w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow(['Product ID', 'Brand', 'Category', 'Solid By', 'Title', 'Price', 'Sizes', 'Description', 'Photo URLs', 'URL_Product'])
+    writer.writerow(['Product ID', 'Brand', 'Category', 'Solid By', 'Product Detail', 'Title', 'Price', 'Sizes', 'Description', 'Photo URLs', 'URL_Product'])
 
 # Чтение URL-адреса товара из CSV файла
-with open('../urls_csv/urls_anime.csv', 'r', newline='', encoding='utf-8') as csvfile:
+with open('../urls_csv/urls_pants.csv', 'r', newline='', encoding='utf-8') as csvfile:
     reader = csv.reader(csvfile)
     next(reader)  # Пропускаем заголовки
     for row in reader:
@@ -46,12 +47,23 @@ with open('../urls_csv/urls_anime.csv', 'r', newline='', encoding='utf-8') as cs
         else:
             sizes = 'Out of stock'
         brand = 'Groovee'
-        category = 'T-Shirt Anime'
+        category = 'Pants'
         sub_category_element = soup.find('div', {'class': 'product-brand-wrap mb-2'})
         if sub_category_element:
             sub_category = sub_category_element.find('span', recursive=False).text.strip()
         else:
             sub_category = 'N/A'
+
+        product_details = soup.find('div', {'class': 'table-responsive'})
+        if product_details:
+            tbody = product_details.find('tbody')
+            if tbody:
+                product_detail = '|'.join(
+                    [f"{row.th.text.strip()}: {row.td.text.strip()}" for row in tbody.find_all('tr')])
+            else:
+                product_detail = 'N/A'
+        else:
+            product_detail = 'N/A'
 
         # Извлекаем описание товара
         description_block = soup.find('div', class_='description')
@@ -70,9 +82,9 @@ with open('../urls_csv/urls_anime.csv', 'r', newline='', encoding='utf-8') as cs
                 break
 
         # Добавляем данные в CSV файл
-        with open('../done_csv/groovee_anime.csv', 'a', newline='', encoding='utf-8') as csvfile:
+        with open('../done_csv/groovee_pants.csv', 'a', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow([product_id, brand, category, sub_category, title, price, sizes, description, ', '.join(best_photo_urls), url])
+            writer.writerow([product_id, brand, category, sub_category, product_detail, title, price, sizes, description, ', '.join(best_photo_urls), url])
 
         # Закрываем браузер после использования
         driver.quit()
