@@ -7,7 +7,7 @@ import urllib.parse
 import time
 
 # Записываем заголовки столбцов в CSV файл
-with open('../done_csv/groovee_pants.csv', 'w', newline='', encoding='utf-8') as csvfile:
+with open('../done_csv/groovee_pants2.csv', 'w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(['Product ID', 'Brand', 'Category', 'Solid By', 'Product Detail', 'Title', 'Price', 'Sizes', 'Description', 'Photo URLs', 'URL_Product'])
 
@@ -82,7 +82,7 @@ with open('../urls_csv/urls_pants.csv', 'r', newline='', encoding='utf-8') as cs
                 break
 
         # Добавляем данные в CSV файл
-        with open('../done_csv/groovee_pants.csv', 'a', newline='', encoding='utf-8') as csvfile:
+        with open('../done_csv/groovee_pants2.csv', 'a', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([product_id, brand, category, sub_category, product_detail, title, price, sizes, description, ', '.join(best_photo_urls), url])
 
