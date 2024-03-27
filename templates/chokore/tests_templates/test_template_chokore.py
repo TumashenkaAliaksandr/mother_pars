@@ -19,7 +19,13 @@ def scrape_product_data(product_id):
     print('Title:', title)
 
     # Находим цену (price)
-    price = soup.find('span', class_='product-price__price').text.strip()
+    price_element = soup.find('span', class_='money')
+    if price_element:
+        price = price_element.text.strip().replace('₹', '')
+    else:
+        price = 'Out of stock'
+
+    print('Price:', price)
 
     # Находим описание (description)
     description = soup.find('div', class_='product-single__description').text.strip()
