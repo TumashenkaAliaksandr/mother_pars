@@ -15,7 +15,8 @@ def scrape_product_data(product_id):
     soup = BeautifulSoup(response.text, 'html.parser')
 
     # Находим заголовок (title)
-    title = soup.find('h1', class_='product-single__title').text.strip()
+    title = soup.find('div', {'class': 'custom-title-wishlist'}).find('h1', recursive=False).text.strip()
+    print('Title:', title)
 
     # Находим цену (price)
     price = soup.find('span', class_='product-price__price').text.strip()
