@@ -70,7 +70,8 @@ def scrape_product_data(product_id):
     photos = [photo['src'] for photo in photo_elements[:3]]
 
     # Находим категорию (category) и подкатегорию (sub category)
-    breadcrumbs = soup.find_all('span', class_='breadcrumb__text')
+    breadcrumbs = soup.find('span', class_='breadcrumbs__link').text.strip()
+    print('Breadcrumb:', breadcrumbs)
     category = breadcrumbs[-2].text.strip()
     sub_category = breadcrumbs[-1].text.strip()
 
