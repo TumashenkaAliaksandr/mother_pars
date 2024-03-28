@@ -19,19 +19,20 @@ def scrape_product_data(product_id):
     print('Title:', title)
 
     # Находим цену (price)
-    price_element = soup.find('span', class_='money')
+    price_element = soup.find('s', {'class': 'product-single__sale-price'}).find('span', recursive=False).text.strip()
     if price_element:
-        price = price_element.text.strip().replace('₹', '')
+        price = price_element.strip().replace('₹', '')
     else:
         price = 'Out of stock'
-
     print('Price:', price)
 
     # Находим описание (description)
-    description = soup.find('div', class_='product-single__description').text.strip()
+    description = soup.find('div', class_='so-tab-content cust-tab4-content').text.strip()
+    print('Description:', description)
 
     # Находим детали (details)
-    details = soup.find('div', class_='product-single__details').text.strip()
+    details = soup.find('div', class_='so-tab-content cust_tab2_conTent').text.strip()
+    print('Datails:', details)
 
     # Находим фото (photo) - берем первые три фото
     photo_elements = soup.find_all('img', class_='product-single__photo')
