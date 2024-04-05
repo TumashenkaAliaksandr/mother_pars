@@ -24,24 +24,27 @@ def scrape_product_data(url):
     soup = BeautifulSoup(response.text, 'html.parser')
 
     # Находим заголовок (title)
-    title = soup.find('div', {'class': 'custom-title-wishlist'}).find('h1', recursive=False).text.strip()
+    title_element = soup.find('div', {'class': 'custom-title-wishlist'})
+    title = title_element.find('h1', recursive=False).text.strip() if title_element else 'No title found'
 
     # Находим цену (price)
-    price_element = soup.find('s', {'class': 'product-single__sale-price'}).find('span', recursive=False).text.strip()
-    price = price_element.strip().replace('₹', '') if price_element else 'Out of stock'
+    price_element = soup.find('s', {'class': 'product-single__sale-price'})
+    price = price_element.find('span', recursive=False).text.strip().replace('₹', '') if price_element else 'Out of stock'
 
     # Находим описание (description)
-    description = soup.find('div', class_='so-tab-content cust-tab4-content').text.strip()
+    description_block = soup.find('div', class_='so-tab-content cust-tab4-content')
+    description = description_block.text.strip() if description_block else 'No description available'
 
     # Находим детали (details)
-    details = soup.find('div', class_='so-tab-content cust_tab2_conTent').text.strip()
+    details_block = soup.find('div', class_='so-tab-content cust_tab2_conTent')
+    details = details_block.text.strip() if details_block else 'No details available'
 
     # Находим все изображения
     image_wrappers = soup.find_all('a', class_='chocolat-image')
-    max_image_url = image_wrappers[0]['href'].lstrip('//')
+    max_image_url = image_wrappers[0]['href'].lstrip('//') if image_wrappers else 'No image URL found'
 
     # Находим категорию (category)
-    breadcrumbs = soup.find('li', class_='breadcrumbs__item category').text.strip()
+    breadcrumbs = soup.find('li', class_='breadcrumbs__item category').text.strip() if soup.find('li', class_='breadcrumbs__item category') else 'No category found'
 
     return {
         'product_id': product_id,
