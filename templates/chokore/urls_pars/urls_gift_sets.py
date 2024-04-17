@@ -5,14 +5,14 @@ import urllib.parse
 import time
 
 # Задаем URL сайта
-url = "https://www.chokore.com/collections/women-accessories"
+url = "https://www.chokore.com/collections/gift-sets"
 
 # Запускаем браузер
 driver = webdriver.Chrome()
 driver.get(url)
 
 # Ждем 20 секунд для загрузки страницы
-time.sleep(20)
+time.sleep(100)
 
 # Получаем HTML-код страницы после загрузки JavaScript
 html = driver.page_source
@@ -26,11 +26,11 @@ product_links = set()
 for link in links:
     href = link.get('href')
     # Проверяем, является ли ссылка на товар
-    if href and '/collections/women-accessories/products/' in href:
+    if href and '/collections/gift-sets/products/' in href:
         product_links.add(urllib.parse.urljoin(url, href))
 
 # Записываем найденные уникальные ссылки в файл CSV
-with open('../product_links_women.csv', 'w', newline='') as csvfile:
+with open('../product_gift_sets.csv', 'w', newline='') as csvfile:
     fieldnames = ['Link']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
