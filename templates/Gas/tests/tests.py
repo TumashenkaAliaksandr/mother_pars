@@ -4,40 +4,6 @@ import csv
 import random
 import string
 import textwrap
-import re
-
-
-# Функция для форматирования описания
-def format_description(description):
-    # Подстановка заголовков для соответствующих частей описания
-    description = description.replace('Specifications :', '\n**Specifications:**\n')
-    description = description.replace(
-        'Machine wash cold, Dry clean, Medium iron, Do not bleach, Do not wring, Do not tumble dry',
-        '\n**Product Care:**\nMachine wash cold, Dry clean, Medium iron, Do not bleach, Do not wring, Do not tumble dry'
-    )
-    description = description.replace('Manufacturer Name:', '\n**Manufacturer:**\n')
-    description = description.replace('Marketer Name:', '\n**Marketer:**\n')
-    description = description.replace('Net Quantity:', '\n**Net Quantity:**\n')
-    description = description.replace('Package Dimension:', '\n**Package Dimension:**\n')
-    description = description.replace('Product Weight:', '\n**Product Weight:**\n')
-    description = description.replace('Customer Care Information:', '\n**Customer Care Information:**\n')
-    description = description.replace('MRP:', '\n**MRP:**\n')
-
-    return description
-
-# Функция для извлечения подкатегории из строки описания
-def extract_subcategory(description):
-    # Поиск строки, начинающейся с 'Name of the Commodity:'
-    match = re.search(r'Name of the Commodity:\s*([^<]+)', description)
-    if match:
-        # Возвращаем только текст до первого тега <br> или окончания строки
-        subcategory = match.group(1).strip()
-        # Обрезаем текст до первого <br> если он есть
-        subcategory = re.split(r'<br\s*/?>', subcategory, 1)[0].strip()
-        # Удаляем все данные, которые следуют за основной подкатегорией
-        subcategory = re.split(r'\*\*Package Dimension:', subcategory, 1)[0].strip()
-        return subcategory
-    return 'Unknown'
 
 
 # Функция для получения информации о продукте по его URL
@@ -80,16 +46,9 @@ def get_product_info(url):
             wrapped_text = textwrap.fill(paragraph_text, width=100, break_long_words=False)
             formatted_description += wrapped_text + '\n\n'
 
-    # Применяем форматирование к описанию
-    formatted_description = format_description(
-        formatted_description) if formatted_description else 'No description available.'
-
-    # Печатаем отформатированное описание для отладки
-    print('Отформатированное описание:', formatted_description)
-
-    # Извлекаем подкатегорию из форматированного описания
-    subcategory = extract_subcategory(formatted_description)
-    print("Подкатегория:", subcategory)
+    # Если описание найдено, возвращаем его, иначе возвращаем пустую строку
+    description = formatted_description if formatted_description else 'No description available.'
+    print('Описание:', description)
 
     # Получаем ссылки на изображения из div с классом 'product-image'
     img_tags = soup.find_all('div', class_='product-image')
@@ -131,38 +90,31 @@ def get_product_info(url):
             # Ищем все лейблы, связанные с радиокнопками
             available_sizes = size_container.find_all('div', class_='radio radio-type-button2')
 
-            if available_sizes:
-                for size in available_sizes:
-                    label = size.find('label')
-                    if label:
-                        size_text = label.get_text(strip=True)
-                        # Добавляем размер в список только если его там нет
-                        if size_text not in sizes:
-                            sizes.append(size_text)
-            else:
-                print("Размеры не найдены в контейнере:", container_id)
-        else:
-            print("Контейнер размеров не найден:", container_id)
+            for size in available_sizes:
+                label = size.find('label')
+                if label:
+                    size_text = label.get_text(strip=True)
+                    # Добавляем размер в список только если его там нет
+                    if size_text not in sizes:
+                        sizes.append(size_text)
 
     # Выводим все доступные размеры
-    sizes_output = ', '.join(sizes) if sizes else 'No sizes available'
-    print("Доступные размеры:", sizes_output)
+    print("Доступные размеры:", ', '.join(sizes))
 
     return {
         'Product ID': product_id,
         'Title': title,
-        'Description': formatted_description,
+        'Description': description,
         'Image URLs': ', '.join(photos[:3]),  # Ссылки на три фотографии в одной строке
         'Price': sale_price,
         'Brand': brand,
         'Category': category,
-        'Subcategory': subcategory,  # Добавляем подкатегорию
-        'Size': sizes_output,
+        'Size': ', '.join(sizes),
     }
 
 
 # Чтение URL из файла CSV и получение информации о продукте для каждой ссылки
-input_file = '../urls_csv/gas_pr_links.csv'
+input_file = '../urls_csv/gas_product_links.csv'
 output_file = '../done_csv/gas_product_info.csv'
 
 with open(input_file, newline='', encoding='utf-8') as csvfile:
@@ -178,10 +130,7 @@ with open(input_file, newline='', encoding='utf-8') as csvfile:
 
 # Записываем информацию о продукте в файл CSV
 with open(output_file, 'w', newline='', encoding='utf-8') as file:
-    writer = csv.DictWriter(file,
-                            fieldnames=['Product ID', 'Brand', 'Category', 'Subcategory', 'Title', 'Price', 'Size',
-                                        'Description',
-                                        'Image URLs'])
+    writer = csv.DictWriter(file, fieldnames=['Product ID', 'Brand', 'Category', 'Title', 'Price', 'Sizes', 'Description', 'Image URLs'])
     writer.writeheader()
     for info in product_info_list:
         writer.writerow(info)
