@@ -30,7 +30,7 @@ for link in links:
         product_links.add(urllib.parse.urljoin(url, href))
 
 # Записываем найденные уникальные ссылки в файл CSV
-with open('urls_csv/product_links.csv', 'w', newline='') as csvfile:
+with open('urls_csv/product_url.csv', 'w', newline='') as csvfile:
     fieldnames = ['Link']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()

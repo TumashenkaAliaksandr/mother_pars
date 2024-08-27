@@ -63,4 +63,4 @@ with open(input_file, mode='r', newline='', encoding='utf-8') as file:
             else:
                 writer.writerow(['', '', '', '', '', '', 'ID продукта не найден или информация о товаре отсутствует'])
 
-print('Информация успешно записана в product_info.csv')
+print('Информация успешно записана в Saya_product_info.csv')

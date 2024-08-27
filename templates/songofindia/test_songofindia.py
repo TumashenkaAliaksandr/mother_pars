@@ -270,14 +270,14 @@ import textwrap
 
 # Функция для сохранения данных в файл CSV
 def save_to_csv(title, category, price, description, description_all, main_image_url, all_image_urls, product_id):
-    with open("product_info.csv", "w", newline="", encoding="utf-8") as csvfile:
+    with open("Saya_product_info.csv", "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["Title", "Category", "Price", "Description", "Description_all", "Main Image URL", "Other Image URLs", "ID"])
 
         # Записываем данные в строку CSV файла
         writer.writerow([title, category, price, description, description_all, main_image_url, ', '.join(all_image_urls), product_id])
 
-    print("Информация о товаре успешно записана в файл product_info.csv.")
+    print("Информация о товаре успешно записана в файл Saya_product_info.csv.")
 
 # Путь к драйверу Chrome (загрузите драйвер, совместимый с вашей версией Chrome)
 chrome_driver_path = "путь_к_драйверу_chrome"
@@ -580,14 +580,14 @@ save_to_csv(title, category, price, description, description_all, main_image_url
 #     main_image_url, all_large_or_medium_image_urls = extract_photos_and_product_id(url)
 #
 #     # Записать данные в файл CSV
-#     with open("product_info.csv", "w", newline="", encoding="utf-8") as csvfile:
+#     with open("Saya_product_info.csv", "w", newline="", encoding="utf-8") as csvfile:
 #         writer = csv.writer(csvfile)
 #         writer.writerow(["Title", "Price", "Main Image URL", "Other Image URLs", "Description", "Description_all", "Category", "Product ID"])
 #
 #         # Записываем данные в строку CSV файла
 #         writer.writerow([title, price, main_image_url, ', '.join(all_large_or_medium_image_urls), wrapped_description, description_all, category, product_id])
 #
-#     print("Информация о товаре успешно записана в файл product_info.csv.")
+#     print("Информация о товаре успешно записана в файл Saya_product_info.csv.")
 #
 # if __name__ == "__main__":
 #     main()

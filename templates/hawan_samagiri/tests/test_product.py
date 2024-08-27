@@ -56,4 +56,4 @@ with open('product_info.csv', 'w', newline='', encoding='utf-8') as file:
     writer.writeheader()
     writer.writerow(product_info)
 
-print("Информация о продукте была сохранена в файл 'product_info.csv'.")
+print("Информация о продукте была сохранена в файл 'Saya_product_info.csv'.")

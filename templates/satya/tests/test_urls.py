@@ -67,7 +67,7 @@ url = urljoin(base_url, "shop")
 product_links = get_product_links(url)
 
 # Записываем ссылки в CSV файл
-with open('product_links.csv', 'w', newline='', encoding='utf-8') as csvfile:
+with open('product_url.csv', 'w', newline='', encoding='utf-8') as csvfile:
     fieldnames = ['url']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
@@ -76,4 +76,4 @@ with open('product_links.csv', 'w', newline='', encoding='utf-8') as csvfile:
         writer.writerow({'url': link})
         print(f"Записали ссылку в CSV: {link}")
 
-print("Ссылки успешно записаны в файл 'product_links.csv'")
+print("Ссылки успешно записаны в файл 'product_url.csv'")

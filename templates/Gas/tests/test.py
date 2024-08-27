@@ -47,4 +47,4 @@ with open('../urls_csv/gas_product_links.csv', 'w', newline='', encoding='utf-8'
     for link in all_product_links:
         writer.writerow({'url': link})
 
-print("Ссылки успешно записаны в файл 'product_links.csv'")
+print("Ссылки успешно записаны в файл 'product_url.csv'")
