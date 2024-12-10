@@ -122,7 +122,7 @@ while True:
         break
 
 # Записываем ссылки в CSV файл
-with open('product_links.csv', 'w', newline='') as csvfile:
+with open('../urls_csv/product_links.csv', 'w', newline='') as csvfile:
     fieldnames = ['url']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
