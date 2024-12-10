@@ -124,7 +124,8 @@ def get_product_info(url):
         'Image URLs': ', '.join(photos[:3]),  # Ссылки на три фотографии в одной строке
         'Old Price': old_price,
         'Category': category,
-        'Size': ', '.join(sizes),
+        'Sizes': ', '.join(sizes),
+        'Colors': ', '.join(colors),
     }
 
 # Чтение URL из файла CSV и получение информации о продукте для каждой ссылки
@@ -148,7 +149,7 @@ with open(input_file, newline='', encoding='utf-8') as csvfile:
 # Записываем информацию о продукте в файл CSV
 with open(output_file, 'w', newline='', encoding='utf-8') as file:
     writer = csv.DictWriter(file,
-                            fieldnames=['Product ID', 'Code Product', 'Category', 'Title', 'Old Price', 'Sizes', 'Description',
+                            fieldnames=['Product ID', 'Code Product', 'Category', 'Title', 'Old Price', 'Sizes', 'Colors', 'Description',
                                         'Image URLs'])
     writer.writeheader()
 
