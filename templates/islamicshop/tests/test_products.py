@@ -5,10 +5,17 @@ import random
 import string
 import textwrap
 
+
 # Функция для получения информации о продукте по его URL
 def get_product_info(url):
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
+
+    # Извлечение категории из <h1> внутри <div class="page-title category-title">
+    # category_element = soup.find('div', class_='category-info').find('h1') if soup.find('div',
+    #                                                                                                 class_='page-title category-title') else None
+    # category = category_element.text.strip() if category_element else 'Category not found'
+    # print("Категория товара:", category)
 
     # Находим название продукта в <h1> или в мета-теге
     title_element = soup.find('h1')
@@ -40,26 +47,20 @@ def get_product_info(url):
 
     print("Старая цена:", old_price)
 
-    # Обработка описания
-    def extract_description(soup):
-        description_container = soup.find('div', class_='tab-content')
-        formatted_description = ''
+    # Извлечение описания
+    description_container = soup.find('div', id='tab-description')
 
-        if description_container:
-            description_paragraphs = description_container.find_all('div')
+    if description_container:
+        # Извлекаем текст из всех дочерних <div> и форматируем его
+        description_paragraphs = description_container.find_all('div', class_='std')
+        formatted_description = '\n\n'.join(
+            textwrap.fill(paragraph.get_text(strip=True), width=100, break_long_words=False)
+            for paragraph in description_paragraphs
+        )
+        description = formatted_description.strip() if formatted_description.strip() else 'No description available.'
+    else:
+        description = 'No description available.'
 
-            # Проверяем, есть ли параграфы
-            if description_paragraphs:
-                for paragraph in description_paragraphs:
-                    paragraph_text = paragraph.get_text(strip=True)
-                    # Форматируем текст для лучшего отображения
-                    wrapped_text = textwrap.fill(paragraph_text, width=100, break_long_words=False)
-                    formatted_description += wrapped_text + '\n\n'
-
-        return formatted_description.strip() if formatted_description.strip() else 'No description available.'
-
-    # Извлекаем описание
-    description = extract_description(soup)
     print('Описание:', description)
 
     # Получаем ссылки на изображения из div с классом 'product-image'
@@ -88,6 +89,17 @@ def get_product_info(url):
     size_container_ids = [
         'product',
     ]
+
+    # Находим элемент с коротким описанием
+    short_description_element = soup.find('div', class_='short-description')
+
+    # Извлекаем текст из элемента
+    if short_description_element:
+        # Получаем текст внутри элемента с учетом форматирования
+        short_description = short_description_element.get_text(strip=True)
+        print("Короткое описание:", short_description)
+    else:
+        print("Короткое описание не найдено.")
 
     # Инициализируем списки для хранения цветов и размеров
     colors = []
@@ -121,11 +133,12 @@ def get_product_info(url):
         'Code Product': code,
         'Title': title,
         'Description': description,
-        'Image URLs': ', '.join(photos[:3]),  # Ссылки на три фотографии в одной строке
+        'Image URLs': ', '.join(photos[:1]),  # Ссылки на три фотографии в одной строке
         'Old Price': old_price,
         'Category': category,
         'Sizes': ', '.join(sizes),
         'Colors': ', '.join(colors),
+        'short_description': short_description,
     }
 
 # Чтение URL из файла CSV и получение информации о продукте для каждой ссылки
@@ -150,7 +163,7 @@ with open(input_file, newline='', encoding='utf-8') as csvfile:
 with open(output_file, 'w', newline='', encoding='utf-8') as file:
     writer = csv.DictWriter(file,
                             fieldnames=['Product ID', 'Code Product', 'Category', 'Title', 'Old Price', 'Sizes', 'Colors', 'Description',
-                                        'Image URLs'])
+                                        'short_description', 'Image URLs'])
     writer.writeheader()
 
     for info in product_info_list:
