@@ -97,7 +97,7 @@ def get_product_info(url):
     if short_description_element:
         # Получаем текст внутри элемента с учетом форматирования
         short_description = short_description_element.get_text(strip=True)
-        print("Короткое описание:", short_description)
+        print("Короткое описание:", short_description)  # Печатаем строку напрямую
     else:
         print("Короткое описание не найдено.")
 
