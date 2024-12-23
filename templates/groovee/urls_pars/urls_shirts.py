@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import urllib.parse
 import time
 
-url = "https://www.groovee.in/browse/shirts"
+url = "https://groovee.in/collections/oversized-tshirts"
 
 # Запускаем браузер
 driver = webdriver.Chrome()
@@ -25,7 +25,7 @@ soup = BeautifulSoup(html, 'html.parser')
 links = soup.find_all('a', href=True)
 product_links = set()
 for link in links:
-    if link['href'].startswith('/product/'):
+    if link['href'].startswith('/collections/'):
         product_links.add(urllib.parse.urljoin(url, link['href']))
 
 # Записываем найденные ссылки в файл CSV

@@ -58,12 +58,12 @@ def main(base_url):
             print("Превышено время выполнения. Процесс остановлен.")
             break
 
-    with open('templates/../../../urls_csv/urls_shirts.csv', 'w', newline='', encoding='utf-8') as file:
+    with open('templates/../../../urls_csv/urls_shirts_old.csv', 'w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(['url'])  # Запись заголовка
         writer.writerows([[link] for link in links])  # Запись ссылок
 
-    print("Ссылки на товары были успешно записаны в файл 'urls_shirts.csv'.")
+    print("Ссылки на товары были успешно записаны в файл 'urls_shirts_old.csv'.")
 
 
 main(base_url)

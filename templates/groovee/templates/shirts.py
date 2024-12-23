@@ -7,9 +7,9 @@ import urllib.parse
 import time
 
 # Записываем заголовки столбцов в CSV файл
-with open('../done_csv/groovee_shirts.csv', 'w', newline='', encoding='utf-8') as csvfile:
+with open('../done_csv/groovee_oversize_shirts.csv', 'w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow(['Product ID', 'Brand', 'Category', 'Solid By', 'Product Detail', 'Title', 'Price', 'Sizes', 'Description', 'Photo URLs', 'URL_Product'])
+    writer.writerow(['Product ID', 'Brand', 'Category', 'Designed By & Brands', 'Title', 'Price', 'Sizes', 'Description', 'Photo URLs', 'URL_Product'])
 
 # Чтение URL-адреса товара из CSV файла
 with open('../urls_csv/urls_shirts.csv', 'r', newline='', encoding='utf-8') as csvfile:
@@ -35,65 +35,94 @@ with open('../urls_csv/urls_shirts.csv', 'r', newline='', encoding='utf-8') as c
         soup = BeautifulSoup(html, 'html.parser')
 
         # Извлекаем данные о товаре
-        title = soup.find('div', {'class': 'product-detail'}).find('h1', recursive=False).text.strip()
-        price_element = soup.find('del', class_='text-danger')
+        title = soup.find('div', {'class': 'main-product__details-wrapper'}).find('h1', recursive=False).text.strip()
+        print('Title:', title)
+        price_element = soup.find('ins', class_='price__sale')
         if price_element:
             price = price_element.text.strip().replace('₹', '')
         else:
             price = 'Out of stock'
-        sizes_container = soup.find('div', {'class': 'option-values d-flex flex-flow flex-wrap'})
+        print('Price:', price)
+        # Находим контейнер с размерами
+        sizes_container = soup.find('div', {'class': 'main-product__form-group'})
         if sizes_container:
-            sizes = '|'.join([size.text.strip() for size in sizes_container.find_all('a', {'role': 'button'})])
+            # Извлекаем все размеры из элементов <label>
+            sizes = '|'.join([size.text.strip() for size in sizes_container.find_all('label')])
         else:
             sizes = 'Out of stock'
-        brand = 'Groovee'
-        category = 'Shirts'
-        sub_category_element = soup.find('div', {'class': 'product-brand-wrap mb-2'})
-        if sub_category_element:
-            sub_category = sub_category_element.find('span', recursive=False).text.strip()
-        else:
-            sub_category = 'N/A'
+        print('Sizes:', sizes)
 
-        product_details = soup.find_all('div', {'class': 'table-responsive'})
-        if product_details:
-            product_detail = ''
-            for block in product_details:
-                tbody = block.find('tbody')
-                if tbody:
-                    for row in tbody.find_all('tr'):
-                        th = row.find('th').text.strip()
-                        if th in ['Color', 'Washcare', 'Fabric', 'Occasion']:
-                            td = row.find('td')
-                            if td:
-                                td_text = td.text.strip()
-                                product_detail += f"{th}: {td_text}\n"  # Добавляем двоеточие и значения из td
-                            else:
-                                product_detail += f"{th}: N/A\n"  # Если нет td, добавляем N/A
-                else:
-                    product_detail = 'N/A'
-        else:
-            product_detail = 'N/A'
+        # Находим все <span> внутри <div class="bdv-wrap">
+        spans = soup.find('div', {'class': 'bdv-wrap'}).find_all('span')
+        # Извлечение текста из каждого <span>
+        for span in spans:
+            print(span.text.strip())
 
-        # Извлекаем описание товара
-        description_block = soup.find('div', class_='description')
+        # Находим все <span> внутри <div class="bdv-wrap">
+        spans = soup.find('div', {'class': 'bdv-wrap'}).find_all('span')
+
+        # Извлечение текста из каждого <span>
+        designed_by_brands = ' | '.join([span.get_text(strip=True) for span in spans])
+        print('Dis & Brends:', designed_by_brands)
+
+        category = 'Oversized-tshirts'
+        # sub_category_element = soup.find('div', {'class': 'product-brand-wrap mb-2'})
+        # if sub_category_element:
+        #     sub_category = sub_category_element.find('span', recursive=False).text.strip()
+        # else:
+        #     sub_category = 'N/A'
+        #
+        # product_details = soup.find_all('div', {'class': 'table-responsive'})
+        # if product_details:
+        #     product_detail = ''
+        #     for block in product_details:
+        #         tbody = block.find('tbody')
+        #         if tbody:
+        #             for row in tbody.find_all('tr'):
+        #                 th = row.find('th').text.strip()
+        #                 if th in ['Color', 'Washcare', 'Fabric', 'Occasion']:
+        #                     td = row.find('td')
+        #                     if td:
+        #                         td_text = td.text.strip()
+        #                         product_detail += f"{th}: {td_text}\n"  # Добавляем двоеточие и значения из td
+        #                     else:
+        #                         product_detail += f"{th}: N/A\n"  # Если нет td, добавляем N/A
+        #         else:
+        #             product_detail = 'N/A'
+        # else:
+        #     product_detail = 'N/A'
+
+        # Находим контейнер с описанием
+        description_block = soup.find('div', class_='accordion__content')
         if description_block:
-            description = description_block.text.strip()
+            description = description_block.text.strip()  # Извлекаем текст и убираем лишние пробелы
         else:
             description = 'No description available'
 
-        # Извлекаем URL-адреса лучших фотографий товара (размером 1800)
-        photo_gallery = soup.find_all('img', class_='feature-image')
-        best_photo_urls = set()
-        for photo in photo_gallery:
-            if '1800' in photo['src']:
-                best_photo_urls.add(photo['src'])
-            if len(best_photo_urls) == 2:
-                break
+        print('Description:', description)
+
+        # Находим div с классом 'main-product__media-wrapper'
+        media_wrapper = soup.find('div', class_='main-product__media-wrapper')
+
+        if media_wrapper:
+            # Находим первое изображение внутри этого div
+            photo = media_wrapper.find('img')
+            if photo:
+                # Извлекаем URL изображения и добавляем https: если необходимо
+                photo_url = photo['src']
+                if photo_url.startswith('//'):
+                    photo_url = 'https:' + photo_url  # Добавляем https:
+            else:
+                photo_url = 'No image available'
+        else:
+            photo_url = 'No media wrapper available'
+
+        print('Photo URL:', photo_url)
 
         # Добавляем данные в CSV файл
-        with open('../done_csv/groovee_shirts.csv', 'a', newline='', encoding='utf-8') as csvfile:
+        with open('../done_csv/groovee_oversize_shirts.csv', 'a', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow([product_id, brand, category, sub_category, product_detail, title, price, sizes, description, ', '.join(best_photo_urls), url])
+            writer.writerow([product_id, span, category, designed_by_brands, title, price, sizes, description, photo_url, url])
 
         # Закрываем браузер после использования
         driver.quit()

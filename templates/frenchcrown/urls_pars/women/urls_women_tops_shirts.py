@@ -28,7 +28,7 @@ with open('templates/../../../urls_csv/urls_women_tops_shirts.csv', 'w', newline
     for link in product_links:
         writer.writerow({'url': link})
 
-print("Ссылки на товары были успешно записаны в файл 'urls_shirts.csv'.")
+print("Ссылки на товары были успешно записаны в файл 'urls_shirts_old.csv'.")
 
 # Закрытие веб-драйвера
 driver.quit()
