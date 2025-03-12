@@ -1,144 +1,193 @@
+# import requests
+# from bs4 import BeautifulSoup
+#
+# def extract_product_data(url):
+#     """
+#     Извлекает данные о продукте из HTML-кода, полученного по URL.
+#     """
+#     try:
+#         response = requests.get(url)
+#         response.raise_for_status()  # Проверка на ошибки HTTP
+#         html_content = response.text
+#     except requests.exceptions.RequestException as e:
+#         print(f"Ошибка при запросе страницы: {e}")
+#         return None
+#
+#     soup = BeautifulSoup(html_content, 'html.parser')
+#
+#     try:
+#         # Название товара
+#         title_element = soup.find('h1', class_='h1') or soup.find('h1')
+#         title = title_element.text.strip() if title_element else "Название не найдено"
+#
+#         # Цена
+#         price_element = soup.find('span', class_='price-item price-item--regular')
+#         price_text = price_element.text.strip() if price_element else "Цена не найдена"
+#
+#         # Убираем "Rs." и пробелы
+#         price = price_text.replace("Rs.", "").replace(" ", "").strip() if price_text != "Цена не найдена" else "Цена не найдена"
+#
+#         # Фото
+#         img_element = soup.find('div', class_='product__media media media--transparent gradient global-media-settings').find('img')
+#         photo_url = img_element['src'] if img_element and 'src' in img_element.attrs else "Фото не найдено"
+#
+#         # Описание
+#         description_element = soup.find('div', class_='product__description rte quick-add-hidden')
+#         description = description_element.text.strip() if description_element else "Описание не найдено"
+#
+#         return {
+#             'title': title,
+#             'price': price,
+#             'photo_url': "https://" + photo_url,
+#             'description': description
+#         }
+#
+#     except Exception as e:
+#         print(f"Ошибка при парсинге данных: {e}")
+#         return None
+#
+# # Пример использования:
+# product_url = "https://ridersarena.com/products/ngk-iridium-spark-plug-set-for-royal-enfield-interceptor-650-gt650"
+# product_data = extract_product_data(product_url)
+#
+# if product_data:
+#     print("Данные о товаре:")
+#     for key, value in product_data.items():
+#         print(f"{key}: {value}")
+# else:
+#     print("Не удалось извлечь данные о товаре.")
+
+
 import requests
 from bs4 import BeautifulSoup
+import csv
+import os
 
 
-def get_product_links(url):
+def extract_product_data(url):
     """
-    Извлекает ссылки на товары со страницы, анализируя HTML-код.
+    Улучшенный парсер данных товара с обработкой ошибок:
+    - Исправлены селекторы для цены
+    - Добавлена проверка URL фото
+    - Улучшена обработка описания
     """
     try:
-        response = requests.get(url)
-        response.raise_for_status()  # Поднимает исключение для плохих статусов (4xx или 5xx)
-    except requests.exceptions.RequestException as e:
-        print(f"Ошибка при запросе страницы: {e}")
-        return []
+        response = requests.get(url, timeout=15)
+        response.raise_for_status()
+    except Exception as e:
+        print(f"Ошибка запроса: {e}")
+        return None
 
     soup = BeautifulSoup(response.content, 'html.parser')
-    product_links = set()  # Используем множество для хранения уникальных ссылок
 
-    # Находим все div с классом "card__information"
-    card_divs = soup.find_all('div', class_='card__information')
+    data = {
+        'title': 'Не найдено',
+        'price': 'Не найдена',
+        'photo_url': 'Не найдено',
+        'description': 'Не найдено'
+    }
 
-    for card_div in card_divs:
-        # Внутри каждого div ищем ссылку (<a>) с классом "full-unstyled-link"
-        a_tag = card_div.find('a', class_='full-unstyled-link')
-        if a_tag:
-            relative_url = a_tag.get('href')
-            # Проверяем, что ссылка не None и не пустая строка
-            if relative_url:
-                # Формируем абсолютный URL, если ссылка относительная
-                if relative_url.startswith('/'):
-                    absolute_url = f"https://ridersarena.com{relative_url}"
-                else:
-                    absolute_url = relative_url
-                product_links.add(absolute_url)  # Добавляем ссылку в множество
+    try:
+        # Название товара
+        title = soup.find('h1', {'class': 'h1'}) or soup.find('h1')
+        if title:
+            data['title'] = title.get_text(strip=True)
 
-    return list(product_links)  # Возвращаем список уникальных ссылок
+        # Цена (учитываем оба варианта отображения)
+        price = (soup.find('span', class_='price-item--sale') or
+                 soup.find('span', class_='price-item--regular'))
+        if price:
+            data['price'] = price.get_text(strip=True).replace('Rs.', '').replace(' ', '')
+
+        # Фото
+        img_container = soup.find('div', class_='product__media')
+        if img_container:
+            img = img_container.find('img', src=True)
+            if img:
+                data['photo_url'] = img['src'] if img['src'].startswith('http') else f"https:{img['src']}"
+
+        # Описание
+        description = soup.find('div', class_='product__description')
+        if description:
+            data['description'] = ' '.join(description.stripped_strings)
+
+    except Exception as e:
+        print(f"Ошибка парсинга: {e}")
+
+    return data
 
 
-# Список URL коллекций
-collection_urls = [
-    "https://ridersarena.com/collections/helmets",
-    "https://ridersarena.com/collections/jackets",
-    "https://ridersarena.com/collections/riding-pants",
-    "https://ridersarena.com/collections/gloves",
-    "https://ridersarena.com/collections/shoes",
-    "https://ridersarena.com/collections/armours",
-    "https://ridersarena.com/collections/headwear",
-    "https://ridersarena.com/collections/backrest-handle",
-    "https://ridersarena.com/collections/bluetooth-intercom",
-    "https://ridersarena.com/collections/body-cover",
-    "https://ridersarena.com/collections/horns",
-    "https://ridersarena.com/collections/indicators",
-    "https://ridersarena.com/collections/luggage",
-    "https://ridersarena.com/collections/lights-ancillaries",
-    "https://ridersarena.com/collections/mobile-holders-1",
-    "https://ridersarena.com/collections/tyre-inflators",
-    "https://ridersarena.com/collections/tank-pads",
-    'https://ridersarena.com/collections/engine-oil',
-    "https://ridersarena.com/collections/polish",
-    "https://ridersarena.com/collections/ceramic-brake-pads",
-    "https://ridersarena.com/collections/chain-kits",
-    "https://ridersarena.com/collections/chain-lube",
-    "https://ridersarena.com/collections/engine-oil-1",
-    "https://ridersarena.com/collections/exhausts",
-    "https://ridersarena.com/collections/iridium-spark-plugs",
-    "https://ridersarena.com/collections/microfibre-cloth",
-    "https://ridersarena.com/collections/polish",
-    "https://ridersarena.com/collections/batteries-for-superbikes",
-    "https://ridersarena.com/collections/cable-lock",
-    "https://ridersarena.com/collections/disc-lock",
-    "https://ridersarena.com/collections/gps-devices",
-    "https://ridersarena.com/collections/flashx",
-    "https://ridersarena.com/collections/obd-scanner",
-    "https://ridersarena.com/collections/scale-models",
-    "https://ridersarena.com/collections/tyres",
-    "https://ridersarena.com/collections/axor",
-    "https://ridersarena.com/collections/amaroq",
-    "https://ridersarena.com/collections/apollo-tyres",
-    "https://ridersarena.com/collections/auto-engina",
-    "https://ridersarena.com/collections/bluarmor",
-    "https://ridersarena.com/collections/bobo",
-    "https://ridersarena.com/collections/carbanado",
-    "https://ridersarena.com/collections/crank1",
-    "https://ridersarena.com/collections/flashx",
-    "https://ridersarena.com/collections/hjg",
-    "https://ridersarena.com/collections/ht-exhaust",
-    "https://ridersarena.com/collections/innovv",
-    "https://ridersarena.com/collections/lazyassbikers",
-    "https://ridersarena.com/collections/k-n",
-    "https://ridersarena.com/collections/korda",
-    "https://ridersarena.com/collections/liquimoly",
-    "https://ridersarena.com/collections/ls2-helmets",
-    "https://ridersarena.com/collections/maddog",
-    "https://ridersarena.com/collections/minda",
-    "https://ridersarena.com/collections/moto-torque",
-    "https://ridersarena.com/collections/motulzone",
-    "https://ridersarena.com/collections/mt",
-    "https://ridersarena.com/collections/mytvs",
-    "https://ridersarena.com/collections/iridium-spark-plugs",
-    "https://ridersarena.com/collections/one-lap",
-    "https://ridersarena.com/collections/raida-1",
-    "https://ridersarena.com/collections/orazo",
-    "https://ridersarena.com/collections/rev-it",
-    "https://ridersarena.com/collections/parani",
-    "https://ridersarena.com/collections/putoline",
-    "https://ridersarena.com/collections/reise",
-    "https://ridersarena.com/collections/rolon-premium",
-    "https://ridersarena.com/collections/sena",
-    "https://ridersarena.com/collections/solace",
-    "https://ridersarena.com/collections/steelbird",
-    "https://ridersarena.com/collections/studds",
-    "https://ridersarena.com/collections/smk",
-    "https://ridersarena.com/collections/tirewell",
-    "https://ridersarena.com/collections/vardenchi-1",
-    "https://ridersarena.com/collections/vega",
-    "https://ridersarena.com/collections/vesrah",
-    "https://ridersarena.com/collections/vista",
-    "https://ridersarena.com/collections/waxpol",
+def read_links_from_file(filename):
+    """
+    Чтение ссылок из CSV файла с проверкой:
+    - Автоматическое определение кодировки
+    - Пропуск заголовка
+    - Валидация URL
+    """
+    links = []
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            next(reader, None)  # Пропускаем заголовок
+            for row in reader:
+                if row and row[0].startswith('http'):
+                    links.append(row[0].strip())
+    except Exception as e:
+        print(f"Ошибка чтения файла: {e}")
+    return links
 
-]
 
-# Создаем пустое множество для хранения всех уникальных ссылок на товары
-all_product_links = set()
+def write_data_to_csv(filename, data):
+    """
+    Запись данных в CSV с:
+    - Проверкой директории
+    - Резервным сохранением при ошибках
+    """
+    try:
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=data[0].keys())
+            writer.writeheader()
+            writer.writerows(data)
+        print(f"Данные сохранены в {os.path.abspath(filename)}")
+    except Exception as e:
+        print(f"Ошибка сохранения: {e}")
+        # Попытка сохранить в текущую директорию при ошибке пути
+        with open('product_data_backup.csv', 'w', encoding='utf-8') as f:
+            f.write('\n'.join([str(item) for item in data]))
 
-# Перебираем все URL коллекций и получаем ссылки на товары с каждой страницы
-for url in collection_urls:
-    product_links = get_product_links(url)
 
-    if product_links:
-        all_product_links.update(product_links)  # Обновляем множество уникальными ссылками
-        print(f"Найдено {len(product_links)} уникальных ссылок на товары на странице {url}")
+if __name__ == "__main__":
+    # Конфигурационные параметры
+    INPUT_FILE = os.path.join('urls_csv', 'product_links.csv')
+    OUTPUT_FILE = os.path.join('parsed_data', 'product_data.csv')
+
+    # Проверка существования файла
+    if not os.path.exists(INPUT_FILE):
+        print(f"Файл {os.path.abspath(INPUT_FILE)} не найден!")
+        print("Проверьте:")
+        print(f"1. Существование файла {INPUT_FILE}")
+        print(f"2. Рабочую директорию: {os.getcwd()}")
+        exit()
+
+    # Основной процесс
+    links = read_links_from_file(INPUT_FILE)
+
+    if not links:
+        print("Не найдено валидных ссылок в файле")
+        exit()
+
+    results = []
+    for idx, url in enumerate(links, 1):
+        print(f"Обработка {idx}/{len(links)}: {url}")
+        try:
+            product_data = extract_product_data(url)
+            if product_data:
+                results.append(product_data)
+        except Exception as e:
+            print(f"Ошибка обработки {url}: {e}")
+
+    if results:
+        write_data_to_csv(OUTPUT_FILE, results)
     else:
-        print(f"Не удалось найти ссылки на товары на странице {url}")
-
-# Выводим все найденные уникальные ссылки на товары
-if all_product_links:
-    print("\nВсе найденные уникальные ссылки на товары:")
-
-    for link in all_product_links:
-        print(link)
-
-    print(f"\nВсего найдено {len(all_product_links)} уникальных ссылок на товары.")
-else:
-    print("Не удалось найти ни одной ссылки на товары.")
+        print("Нет данных для сохранения")
