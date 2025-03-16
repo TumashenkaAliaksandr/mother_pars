@@ -1,5 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
+import re
+import csv
+
 
 def extract_product_data(url):
     """
@@ -40,14 +43,17 @@ def extract_product_data(url):
             product_data['price'] = price_text.replace("Rs.", "").replace(" ", "").strip()
 
         # Фото (основное)
-        img_element = soup.find('div', class_='product__media').find('img') if soup.find('div', class_='product__media') else None
+        img_element = soup.find('div', class_='product__media').find('img') if soup.find('div',
+                                                                                         class_='product__media') else None
         if img_element and 'srcset' in img_element.attrs:
             # Получаем все URL из srcset и выбираем самый большой
             srcset = img_element['srcset'].split(',')
             best_image_url = max((s.split()[0].strip() for s in srcset), default='')
-            product_data['photo_url'] = "https:" + best_image_url if not best_image_url.startswith('http') and best_image_url else best_image_url
+            product_data['photo_url'] = "https:" + best_image_url if not best_image_url.startswith(
+                'http') and best_image_url else best_image_url
         elif img_element and 'src' in img_element.attrs:
-            product_data['photo_url'] = "https:" + img_element['src'] if not img_element['src'].startswith('http') else img_element['src']
+            product_data['photo_url'] = "https:" + img_element['src'] if not img_element['src'].startswith('http') else \
+            img_element['src']
 
         # Описание
         description_element = soup.find('div', class_='product__description')
@@ -80,19 +86,61 @@ def extract_product_data(url):
             if img_element and 'srcset' in img_element.attrs:
                 # Получаем все URL из srcset и выбираем самый большой
                 srcset = img_element['srcset'].split(',')
-                best_image_url = max((s.split()[0].strip() for s in srcset), default='')
-                product_data['additional_images'].append("https:" + best_image_url if not best_image_url.startswith('http') and best_image_url else best_image_url)
+
+                # Разбиваем srcset на части и находим максимальную ширину
+                widths = [int(s.split()[1].replace('w', '')) for s in srcset if 'w' in s.split()[1]]
+                max_width_index = widths.index(max(widths))
+                best_image_url = srcset[max_width_index].split()[0].strip()
+
+                # Удаляем параметры, которые могут уменьшать изображение
+                best_image_url = re.sub(r'\?v=\d+&width=\d+', '', best_image_url)
+                best_image_url = re.sub(r'\?width=\d+', '', best_image_url)
+
+                product_data['additional_images'].append("https:" + best_image_url if not best_image_url.startswith(
+                    'http') and best_image_url else best_image_url)
             elif img_element and 'src' in img_element.attrs:
+                # Если нет srcset, используем src
                 img_src = img_element['src']
-                product_data['additional_images'].append("https:" + img_src if not img_src.startswith('http') else img_src)
+
+                # Удаляем параметры, которые могут уменьшать изображение
+                img_src = re.sub(r'\?v=\d+&width=\d+', '', img_src)
+                img_src = re.sub(r'\?width=\d+', '', img_src)
+
+                product_data['additional_images'].append(
+                    "https:" + img_src if not img_src.startswith('http') else img_src)
+
+
 
     except Exception as e:
         print(f"Ошибка при парсинге данных: {e}")
 
     return product_data
 
+
+def write_to_csv(filename, data):
+    """
+    Записывает данные в CSV-файл.
+    """
+    fieldnames = ['title', 'price', 'photo_url', 'description', 'sizes', 'colors', 'additional_images']
+
+    try:
+        with open(filename, mode='w', newline='', encoding='utf-8') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+
+            # Преобразуем списки в строки для записи в CSV
+            data['sizes'] = ', '.join(data.get('sizes', []))
+            data['colors'] = ', '.join(data.get('colors', []))
+            data['additional_images'] = ', '.join(data.get('additional_images', []))
+            writer.writerow(data)
+
+        print(f"Данные успешно записаны в файл {filename}")
+    except Exception as e:
+        print(f"Ошибка записи в CSV: {e}")
+
+
 # Пример использования:
-product_url = "https://ridersarena.com/products/display-screen-guard-royal-enfield-classic-reborn-350?_pos=1&_fid=e92c2c754&_ss=c"
+product_url = "https://ridersarena.com/products/liqui-moly-15w50-4t-street-synthetic-technology-engine-oil-1-litre-lm030-for-bikes"
 product_data = extract_product_data(product_url)
 
 if product_data:
@@ -120,6 +168,8 @@ if product_data:
             print(img)
     else:
         print("Дополнительные изображения не найдены.")
+
+    write_to_csv("product_data.csv", product_data)
 else:
     print("Не удалось извлечь данные о товаре.")
 
