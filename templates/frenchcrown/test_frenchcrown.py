@@ -152,12 +152,12 @@
 #             data_variant = product_element.find("span", class_="smartwishlist").get("data-variant")
 #             data_variants.append(data_variant)
 #
-#     with open('product_data.csv', 'w', newline='', encoding='utf-8') as file:
+#     with open('one_product_motoarena.csv', 'w', newline='', encoding='utf-8') as file:
 #         writer = csv.writer(file)
 #         writer.writerow(['url', 'data-variant'])
 #         for link, variant in zip(product_links, data_variants):
 #             writer.writerow([link, variant])
 #
-#     print("Ссылки на товары и значения data-variant были успешно записаны в файл 'product_data.csv'.")
+#     print("Ссылки на товары и значения data-variant были успешно записаны в файл 'one_product_motoarena.csv'.")
 #
 # main(base_url)

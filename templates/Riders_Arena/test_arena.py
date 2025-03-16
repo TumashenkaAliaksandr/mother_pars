@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import csv
+import random
 
 
 def extract_product_data(url):
@@ -21,13 +22,16 @@ def extract_product_data(url):
     soup = BeautifulSoup(html_content, 'html.parser')
 
     product_data = {
+        'id': random.randint(1000000, 9999999),  # Рандомный ID
+        'product_url': url,  # Ссылка на продукт
         'title': "Название не найдено",
         'price': "Цена не найдена",
         'photo_url': "Фото не найдено",
         'description': "Описание не найдено",
         'sizes': [],
         'colors': [],
-        'additional_images': []
+        'additional_images': [],
+        'brand': "Бренд не найден"
     }
 
     try:
@@ -59,6 +63,11 @@ def extract_product_data(url):
         description_element = soup.find('div', class_='product__description')
         if description_element:
             product_data['description'] = description_element.text.strip()
+
+            # Проверка на бренд в описании
+            brand_name = "Liqui Moly"
+            if brand_name.lower() in product_data['description'].lower():
+                product_data['brand'] = brand_name
 
         # Размеры
         size_fieldset = soup.find('legend', string='Size')
@@ -121,7 +130,8 @@ def write_to_csv(filename, data):
     """
     Записывает данные в CSV-файл.
     """
-    fieldnames = ['title', 'price', 'photo_url', 'description', 'sizes', 'colors', 'additional_images']
+    fieldnames = ['id', 'product_url', 'title', 'price', 'photo_url', 'description', 'sizes', 'colors',
+                  'additional_images', 'brand']
 
     try:
         with open(filename, mode='w', newline='', encoding='utf-8') as file:
@@ -145,10 +155,13 @@ product_data = extract_product_data(product_url)
 
 if product_data:
     print("Данные о товаре:")
+    print(f"ID: {product_data['id']}")
+    print(f"Ссылка на продукт: {product_data['product_url']}")
     print(f"Название: {product_data['title']}")
     print(f"Цена: {product_data['price']}")
     print(f"Фото: {product_data['photo_url']}")
     print(f"Описание: {product_data['description']}")
+    print(f"Бренд: {product_data['brand']}")
 
     # Проверяем наличие размеров и цветов
     if product_data['sizes']:
@@ -169,7 +182,7 @@ if product_data:
     else:
         print("Дополнительные изображения не найдены.")
 
-    write_to_csv("product_data.csv", product_data)
+    write_to_csv("one_product_motoarena.csv", product_data)
 else:
     print("Не удалось извлечь данные о товаре.")
 
@@ -275,7 +288,7 @@ else:
 # if __name__ == "__main__":
 #     # Конфигурационные параметры
 #     INPUT_FILE = os.path.join('urls_csv', 'product_links.csv')
-#     OUTPUT_FILE = os.path.join('parsed_data', 'product_data.csv')
+#     OUTPUT_FILE = os.path.join('parsed_data', 'one_product_motoarena.csv')
 #
 #     # Проверка существования файла
 #     if not os.path.exists(INPUT_FILE):

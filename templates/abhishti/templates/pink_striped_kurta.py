@@ -112,4 +112,4 @@ with open('../urls_csv/urls_new_arrival_men.csv', 'r', encoding='utf-8') as file
             csvwriter.writerow(
                 [title, price, category, sex, brand, ', '.join(aria_labels), ', '.join(values), all_text, '\n'.join(image_urls), digits_value])
 
-        print("Данные сохранены в product_data.csv")
+        print("Данные сохранены в one_product_motoarena.csv")
