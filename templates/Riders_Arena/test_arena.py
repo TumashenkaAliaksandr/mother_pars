@@ -8,8 +8,6 @@ import random
 def extract_product_data(url):
     """
     Извлекает данные о продукте из HTML-кода, полученного по URL.
-    Добавлена обработка исключений для размеров, цветов и дополнительных изображений.
-    Получаем изображения наилучшего качества, доступные в `srcset`.
     """
     try:
         response = requests.get(url)
@@ -41,84 +39,83 @@ def extract_product_data(url):
             product_data['title'] = title_element.text.strip()
 
         # Цена
-        price_element = soup.find('s', class_='price-item price-item--regular')
-        if price_element:
-            price_text = price_element.text.strip()
-            product_data['price'] = price_text.replace("Rs.", "").replace(" ", "").strip()
+        price_container = soup.find('div', class_='price__container')
+        if price_container:
+            regular_price_element = price_container.find('span', class_='price-item price-item--regular')
+            sale_price_element = price_container.find('span', class_='price-item price-item--sale')
+
+            if regular_price_element and regular_price_element.text.strip():
+                product_data['price'] = regular_price_element.text.strip().replace("Rs.", "").replace(",", "").strip()
+            elif sale_price_element and sale_price_element.text.strip():
+                product_data['price'] = sale_price_element.text.strip().replace("Rs.", "").replace(",", "").strip()
+            else:
+                print("Цена не найдена.")
+        else:
+            print("Цена не найдена.")
 
         # Фото (основное)
-        img_element = soup.find('div', class_='product__media').find('img') if soup.find('div',
-                                                                                         class_='product__media') else None
+        img_element = soup.find('div', class_='product__media').find('img') if soup.find('div', class_='product__media') else None
         if img_element and 'srcset' in img_element.attrs:
-            # Получаем все URL из srcset и выбираем самый большой
             srcset = img_element['srcset'].split(',')
             best_image_url = max((s.split()[0].strip() for s in srcset), default='')
-            product_data['photo_url'] = "https:" + best_image_url if not best_image_url.startswith(
-                'http') and best_image_url else best_image_url
+            product_data['photo_url'] = "https:" + best_image_url if not best_image_url.startswith('http') and best_image_url else best_image_url
         elif img_element and 'src' in img_element.attrs:
-            product_data['photo_url'] = "https:" + img_element['src'] if not img_element['src'].startswith('http') else \
-            img_element['src']
+            product_data['photo_url'] = "https:" + img_element['src'] if not img_element['src'].startswith('http') else img_element['src']
 
         # Описание
         description_element = soup.find('div', class_='product__description')
         if description_element:
-            product_data['description'] = description_element.text.strip()
+            description_text = description_element.text.strip()
+
+            # Удаляем слова или фразы, связанные с доставкой и заметками
+            delivery_keywords = ['shipping', 'delivery', 'order confirmation', 'actuals', 'please note']
+            for keyword in delivery_keywords:
+                description_text = re.sub(rf'(?i){keyword}.*?(?=\.|\n|$)', '', description_text)
+
+            product_data['description'] = description_text.strip()
 
             # Проверка на бренд в описании
-            brand_name = "Liqui Moly"
-            if brand_name.lower() in product_data['description'].lower():
-                product_data['brand'] = brand_name
+            lines = description_text.split('\n')
+            brand_found = False
+            for line in lines:
+                if 'Brand' in line:
+                    parts = line.split(':')
+                    if len(parts) > 1:
+                        product_data['brand'] = parts[1].strip()
+                        brand_found = True
+                        break
+
+            if not brand_found:
+                # Если бренд не найден, берем все название в качестве бренда
+                product_data['brand'] = product_data['title']
 
         # Размеры
         size_fieldset = soup.find('legend', string='Size')
         if size_fieldset:
             size_parent = size_fieldset.find_parent('fieldset')
             sizes = [input_tag['value'] for input_tag in size_parent.find_all('input', {'name': 'Size'})]
-            if sizes:
-                product_data['sizes'] = sizes
-            else:
-                print("Размеры не найдены")
+            product_data['sizes'] = sizes if sizes else []
 
         # Цвета
         color_fieldset = soup.find('legend', string='Color')
         if color_fieldset:
             color_parent = color_fieldset.find_parent('fieldset')
             colors = [input_tag['value'] for input_tag in color_parent.find_all('input', {'name': 'Color'})]
-            if colors:
-                product_data['colors'] = colors
-            else:
-                print("Цвета не найдены")
+            product_data['colors'] = colors if colors else []
 
         # Дополнительные изображения
         for li in soup.find_all('li', class_='thumbnail-list__item'):
             img_element = li.find('img')
             if img_element and 'srcset' in img_element.attrs:
-                # Получаем все URL из srcset и выбираем самый большой
                 srcset = img_element['srcset'].split(',')
-
-                # Разбиваем srcset на части и находим максимальную ширину
-                widths = [int(s.split()[1].replace('w', '')) for s in srcset if 'w' in s.split()[1]]
-                max_width_index = widths.index(max(widths))
-                best_image_url = srcset[max_width_index].split()[0].strip()
-
-                # Удаляем параметры, которые могут уменьшать изображение
+                widths = [int(s.split()[1].replace('w', '')) for s in srcset if len(s.split()) > 1 and 'w' in s.split()[1]]
+                max_width_index = widths.index(max(widths)) if widths else -1
+                best_image_url = srcset[max_width_index].split()[0].strip() if max_width_index != -1 else ''
                 best_image_url = re.sub(r'\?v=\d+&width=\d+', '', best_image_url)
-                best_image_url = re.sub(r'\?width=\d+', '', best_image_url)
-
-                product_data['additional_images'].append("https:" + best_image_url if not best_image_url.startswith(
-                    'http') and best_image_url else best_image_url)
+                product_data['additional_images'].append("https:" + best_image_url if not best_image_url.startswith('http') and best_image_url else best_image_url)
             elif img_element and 'src' in img_element.attrs:
-                # Если нет srcset, используем src
-                img_src = img_element['src']
-
-                # Удаляем параметры, которые могут уменьшать изображение
-                img_src = re.sub(r'\?v=\d+&width=\d+', '', img_src)
-                img_src = re.sub(r'\?width=\d+', '', img_src)
-
-                product_data['additional_images'].append(
-                    "https:" + img_src if not img_src.startswith('http') else img_src)
-
-
+                img_src = re.sub(r'\?v=\d+&width=\d+', '', img_element['src'])
+                product_data['additional_images'].append("https:" + img_src if not img_src.startswith('http') else img_src)
 
     except Exception as e:
         print(f"Ошибка при парсинге данных: {e}")
