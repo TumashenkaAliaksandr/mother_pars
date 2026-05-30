@@ -1,91 +1,245 @@
 import csv
 import random
 import string
+import time
+import json
+
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException, WebDriverException
 from bs4 import BeautifulSoup
 import urllib.parse
-import time
 
-# Записываем заголовки столбцов в CSV файл
-with open('../done_csv/groovee_jackets.csv', 'w', newline='', encoding='utf-8') as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(['Product ID', 'Brand', 'Category', 'Solid By', 'Product Detail', 'Title', 'Price', 'Sizes', 'Description', 'Photo URLs', 'URL_Product'])
 
-# Чтение URL-адреса товара из CSV файла
-with open('../urls_csv/urls_jackets.csv', 'r', newline='', encoding='utf-8') as csvfile:
-    reader = csv.reader(csvfile)
-    next(reader)  # Пропускаем заголовки
-    for row in reader:
-        url = row[0]  # Получаем URL-адрес из первого столбца (первый столбец содержит URL)
+INPUT_FILE = '../urls_csv/urls_jackets.csv'
+OUTPUT_FILE = '../done_csv/groovee_jackets.csv'
 
-        # Генерируем случайный ID из цифр
-        product_id = ''.join(random.choices(string.digits, k=8))
+BASE_URL = "https://groovee.in"
 
-        # Запускаем браузер
-        driver = webdriver.Chrome()
-        driver.get(url)
 
-        # Ждем 5 секунд для загрузки страницы
-        time.sleep(5)
+# -----------------------------
+# CSV HEADER
+# -----------------------------
+with open(OUTPUT_FILE, 'w', newline='', encoding='utf-8') as f:
+    writer = csv.writer(f)
+    writer.writerow([
+        'Product ID',
+        'Brand',
+        'Category',
+        'Sold By',
+        'Product Detail',
+        'Title',
+        'Price',
+        'Sizes',
+        'Description',
+        'Photo URLs',
+        'URL_Product'
+    ])
 
-        # Получаем HTML-код страницы после загрузки JavaScript
-        html = driver.page_source
 
-        # Используем BeautifulSoup для парсинга HTML
-        soup = BeautifulSoup(html, 'html.parser')
+# -----------------------------
+# URL FIX FUNCTION
+# -----------------------------
+def make_full_url(url: str) -> str:
+    if not url:
+        return ""
 
-        # Извлекаем данные о товаре
-        title = soup.find('div', {'class': 'product-detail'}).find('h1', recursive=False).text.strip()
-        price_element = soup.find('del', class_='text-danger')
-        if price_element:
-            price = price_element.text.strip().replace('₹', '')
-        else:
-            price = 'Out of stock'
-        sizes_container = soup.find('div', {'class': 'option-values d-flex flex-flow flex-wrap'})
-        if sizes_container:
-            sizes = '|'.join([size.text.strip() for size in sizes_container.find_all('a', {'role': 'button'})])
-        else:
-            sizes = 'Out of stock'
-        brand = 'Groovee'
-        category = 'Jackets'
-        sub_category_element = soup.find('div', {'class': 'product-brand-wrap mb-2'})
-        if sub_category_element:
-            sub_category = sub_category_element.find('span', recursive=False).text.strip()
-        else:
-            sub_category = 'N/A'
+    url = url.strip()
 
-        product_details = soup.find('div', {'class': 'table-striped'})
-        if product_details:
-            tbody = product_details.find('tbody')
-            if tbody:
-                rows = tbody.find_all('tr')
-                product_detail = '|'.join(
-                    [f"{row.th.text.strip()}: {row.td.text.strip()}" for row in rows])
+    if url.startswith("//"):
+        return "https:" + url
+
+    if url.startswith("/"):
+        return urllib.parse.urljoin(BASE_URL, url)
+
+    return url
+
+
+# -----------------------------
+# RANDOM ID
+# -----------------------------
+def rand_id():
+    return ''.join(random.choices(string.digits, k=10))
+
+
+def safe(el):
+    return el.text.strip() if el else 'N/A'
+
+
+# -----------------------------
+# CHROME
+# -----------------------------
+options = Options()
+
+# options.add_argument("--headless=new")
+options.add_argument("--disable-gpu")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--disable-blink-features=AutomationControlled")
+
+driver = webdriver.Chrome(options=options)
+driver.set_page_load_timeout(25)
+
+
+try:
+    with open(INPUT_FILE, 'r', newline='', encoding='utf-8') as f:
+        reader = csv.reader(f)
+        next(reader, None)
+
+        for row in reader:
+
+            if not row or not row[0].strip():
+                continue
+
+            raw_url = row[0].strip()
+
+            # ✅ FIX URL HERE
+            url = make_full_url(raw_url)
+
+            print(f"\n➡ {url}")
+
+            product_id = rand_id()
+
+            try:
+                driver.get(url)
+
+            except TimeoutException:
+                print("⛔ Timeout -> stop loading")
+                driver.execute_script("window.stop();")
+
+            except WebDriverException as e:
+                print(f"⛔ Driver error: {e}")
+                continue
+
+            time.sleep(5)
+
+            soup = BeautifulSoup(driver.page_source, 'html.parser')
+
+            # -----------------------------
+            # JS PRODUCT
+            # -----------------------------
+            product = None
+            try:
+                js = driver.execute_script(
+                    "return window.product ? JSON.stringify(window.product) : null;"
+                )
+                if js:
+                    product = json.loads(js)
+            except:
+                product = None
+
+            # -----------------------------
+            # TITLE
+            # -----------------------------
+            title = 'N/A'
+            if product and product.get('title'):
+                title = product['title']
             else:
-                product_detail = 'N/A'
-        else:
-            product_detail = 'N/A'
+                h1 = soup.select_one('div.product-detail h1')
+                title = safe(h1)
 
-        # Извлекаем описание товара
-        description_block = soup.find('div', class_='description')
-        if description_block:
-            description = description_block.text.strip()
-        else:
-            description = 'No description available'
+            # -----------------------------
+            # PRICE
+            # -----------------------------
+            price = "Out of stock"
 
-        # Извлекаем URL-адреса лучших фотографий товара (размером 1800)
-        photo_gallery = soup.find_all('img', class_='feature-image')
-        best_photo_urls = set()
-        for photo in photo_gallery:
-            if '1800' in photo['src']:
-                best_photo_urls.add(photo['src'])
-            if len(best_photo_urls) == 2:
-                break
+            if product and product.get('price'):
+                price = str(product['price'] / 100)
+            else:
+                price_el = soup.find('del', class_='text-danger') or soup.find('span', class_='price')
+                if price_el:
+                    price = price_el.text.strip().replace('₹', '').replace(',', '').strip()
 
-        # Добавляем данные в CSV файл
-        with open('../done_csv/groovee_jackets.csv', 'a', newline='', encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow([product_id, brand, category, sub_category, product_detail, title, price, sizes, description, ', '.join(best_photo_urls), url])
+            # -----------------------------
+            # SIZES
+            # -----------------------------
+            sizes = []
 
-        # Закрываем браузер после использования
-        driver.quit()
+            if product and product.get('variants'):
+                sizes = [v.get('title') for v in product['variants'] if v.get('title')]
+            else:
+                sizes_block = soup.find('div', class_='option-values d-flex flex-flow flex-wrap')
+                if sizes_block:
+                    sizes = [a.text.strip() for a in sizes_block.find_all('a', {'role': 'button'})]
+
+            sizes_str = '|'.join(sizes) if sizes else "N/A"
+
+            # -----------------------------
+            # DESCRIPTION
+            # -----------------------------
+            description = "No description available"
+
+            if product and product.get('description'):
+                description = BeautifulSoup(product['description'], 'html.parser').get_text(" ").strip()
+            else:
+                desc = soup.find('div', class_='description')
+                if desc:
+                    description = desc.get_text(" ").strip()
+
+            # -----------------------------
+            # PHOTOS
+            # -----------------------------
+            photos = []
+
+            if product and product.get('images'):
+                photos = product['images'][:6]
+            else:
+                for img in soup.find_all('img', class_='feature-image'):
+                    src = img.get('src') or img.get('data-src')
+                    if src:
+                        photos.append(src)
+                    if len(photos) >= 6:
+                        break
+
+            # ✅ FIX PHOTO URLS TOO
+            photos = [make_full_url(p) for p in photos]
+            photos = list(dict.fromkeys(photos))
+            photos_str = ', '.join(photos)
+
+            # -----------------------------
+            # PRODUCT DETAIL
+            # -----------------------------
+            detail = []
+
+            for block in soup.select('.product-attributes .attribute-block'):
+                t = block.select_one('.attribute-title')
+                v = block.select_one('.attribute-value')
+                if t and v:
+                    detail.append(f"{t.text.strip()}: {v.text.strip()}")
+
+            for tr in soup.select('table tr'):
+                th = tr.find('th')
+                td = tr.find('td')
+
+                if th and td:
+                    key = th.text.strip()
+                    if key in ['Color', 'Washcare', 'Fabric', 'Occasion', 'Material', 'Fit']:
+                        detail.append(f"{key}: {td.text.strip()}")
+
+            product_detail = '|'.join(detail) if detail else "N/A"
+
+            # -----------------------------
+            # SAVE
+            # -----------------------------
+            with open(OUTPUT_FILE, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+
+                writer.writerow([
+                    product_id,
+                    "Groovee",
+                    "Jackets",
+                    "Groovee",
+                    product_detail,
+                    title,
+                    price,
+                    sizes_str,
+                    description,
+                    photos_str,
+                    url  # ✅ FULL URL NOW
+                ])
+
+            print(f"✔ {title[:60]}")
+
+finally:
+    driver.quit()
+    print("\nDONE")

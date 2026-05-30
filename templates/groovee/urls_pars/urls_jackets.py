@@ -1,41 +1,155 @@
-# https://www.groovee.in/browse/oversized-tie-dye-hoodies-and-sweatshirts-for-men
-
 import csv
-from selenium import webdriver
-from bs4 import BeautifulSoup
-import urllib.parse
 import time
+import urllib.parse
 
-url = "https://www.groovee.in/browse/unisex-hoodies-and-jacket-anime-streetwear"
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException
 
-# Запускаем браузер
-driver = webdriver.Chrome()
-driver.get(url)
 
-# Ждем 20 секунд для загрузки страницы
-time.sleep(25)
+URL = "https://groovee.in/collections/fresh-drop"
+OUTPUT_CSV = "../urls_csv/urls_jackets.csv"
 
-# Получаем HTML-код страницы после загрузки JavaScript
-html = driver.page_source
 
-# Используем BeautifulSoup для парсинга HTML
-soup = BeautifulSoup(html, 'html.parser')
+# -----------------------------------
+# Настройка Chrome
+# -----------------------------------
 
-# Находим все ссылки на странице, которые начинаются с '/product/'
-links = soup.find_all('a', href=True)
-product_links = set()
-for link in links:
-    if link['href'].startswith('/product/'):
-        product_links.add(urllib.parse.urljoin(url, link['href']))
+options = Options()
 
-# Записываем найденные ссылки в файл CSV
-with open('../urls_csv/urls_jackets.csv', 'w', newline='') as csvfile:
-    fieldnames = ['Link']
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+# Для отладки лучше оставить браузер видимым
+# options.add_argument("--headless=new")
 
-    writer.writeheader()
-    for product_link in product_links:
-        writer.writerow({'Link': product_link})
+options.add_argument("--start-maximized")
+options.add_argument("--disable-gpu")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
 
-# Закрываем браузер после использования
-driver.quit()
+driver = webdriver.Chrome(options=options)
+
+driver.set_page_load_timeout(60)
+
+try:
+
+    print(f"Открываю страницу: {URL}")
+
+    driver.get(URL)
+
+    time.sleep(8)
+
+    # -----------------------------------
+    # Автоскролл
+    # -----------------------------------
+
+    print("Запускаю автоскролл...")
+
+    last_height = driver.execute_script(
+        "return document.body.scrollHeight"
+    )
+
+    same_height_count = 0
+
+    while True:
+
+        driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);"
+        )
+
+        time.sleep(4)
+
+        new_height = driver.execute_script(
+            "return document.body.scrollHeight"
+        )
+
+        print(f"Высота страницы: {new_height}")
+
+        if new_height == last_height:
+
+            same_height_count += 1
+
+            if same_height_count >= 3:
+                print("Страница полностью загружена.")
+                break
+
+        else:
+
+            same_height_count = 0
+
+        last_height = new_height
+
+    time.sleep(5)
+
+    # -----------------------------------
+    # Сбор ссылок через JS
+    # -----------------------------------
+
+    raw_links = driver.execute_script("""
+        return Array.from(
+            document.querySelectorAll('a.product-card__link')
+        ).map(el => el.getAttribute('href'));
+    """)
+
+    print(f"Найдено элементов: {len(raw_links)}")
+
+    product_links = set()
+
+    for href in raw_links:
+
+        if not href:
+            continue
+
+        href = href.strip()
+
+        if "/products/" not in href:
+            continue
+
+        full_url = urllib.parse.urljoin(
+            "https://groovee.in",
+            href
+        )
+
+        product_links.add(full_url)
+
+    print(
+        f"Уникальных ссылок найдено: "
+        f"{len(product_links)}"
+    )
+
+    # -----------------------------------
+    # Сохранение CSV
+    # -----------------------------------
+
+    with open(
+        OUTPUT_CSV,
+        "w",
+        newline="",
+        encoding="utf-8"
+    ) as csvfile:
+
+        writer = csv.writer(csvfile)
+
+        writer.writerow(["Link"])
+
+        for link in sorted(product_links):
+
+            writer.writerow([link])
+
+    print(
+        f"Сохранено ссылок: "
+        f"{len(product_links)}"
+    )
+
+except TimeoutException:
+
+    print("Таймаут загрузки страницы.")
+
+except Exception as e:
+
+    print(f"Ошибка: {e}")
+
+finally:
+
+    driver.quit()
+
+    print("Браузер закрыт.")
+    print("Парсинг завершен.")
