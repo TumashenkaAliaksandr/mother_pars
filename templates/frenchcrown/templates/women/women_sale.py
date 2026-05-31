@@ -1,162 +1,204 @@
 import os
+import random
 import re
+from urllib.parse import urljoin
 import textwrap
-
 import requests
 from bs4 import BeautifulSoup
 import csv
 
-directory = 'templates/../../../done_csv'
-filename = 'women_sale.csv'
+directory = r"templates\frenchcrown\templates\women"
+filename = "womensale.csv"
 FILEPARAMS = os.path.join(directory, filename)
 
-def create_csv(filename, order):
-    with open(filename, 'w', encoding='utf-8', newline='') as file:
-        csv.writer(file).writerow(order)
 
-def write_data_csv(filename, data):
-    with open(filename, 'a', encoding='utf-8', newline='') as file:
-        csv.DictWriter(file, fieldnames=list(data)).writerow(data)
+def create_csv(filename, order):
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with open(filename, "w", encoding="utf-8", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(order)
+
+
+def write_data(filename, data):
+    with open(filename, "a", encoding="utf-8", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=list(data.keys()))
+        writer.writerow(data)
+
+
+def safe_text(tag, default=""):
+    return tag.get_text(" ", strip=True) if tag else default
+
 
 def get_data(url):
-    html = requests.get(url).text
-    soup = BeautifulSoup(html, 'html.parser')
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+    }
+    html = requests.get(url, headers=headers, timeout=30).text
+    soup = BeautifulSoup(html, "html.parser")
 
-    title = soup.find("h1", class_="ProductMeta__Title").text.strip()  # этот кусок кода для тайтла
-    print('Title: ', title)
+    title_tag = soup.find("h1", class_="product-title")
+    title = safe_text(title_tag, "N/A")
+    print("Title:", title)
 
-    brand = 'Frenchcrown'
+    brand = "French Crown"
+    category = "Womens"
+    subcategory = "Womens Sale"
+    print("Category:", category)
 
-    category = "Women's"
-    sub_category = "Women's Sale"
-    print('Category: ', category)
+    compare_price_tag = soup.select_one("compare-at-price.line-through")
 
-    price = soup.find('span', class_="ProductMeta__Price").text.replace('₹', '').strip()
-    print('Price: ', price)
-
-    desc_container = soup.find('div', {'class': 'Collapsible Collapsible--large'})
-    desc = desc_container.text.strip() if desc_container else ''
-
-    lines = []
-    current_line = ''
-    for word in desc.split():
-        if len(current_line + ' ' + word) > 100:
-            lines.append(current_line)
-            current_line = word
-        else:
-            current_line += ' ' + word
-    if current_line:
-        lines.append(current_line)
-    formatted_text = '\n'.join(lines)
-    print('Description:', '\n', formatted_text)
-
-    desc_two = ""
-    # Извлекаем текст из <div class="Rte">
-    rte_div = soup.find('div', class_='Rte')
-    if rte_div:
-        rte_text = rte_div.get_text(strip=True)
-        rte_text = textwrap.fill(rte_text, width=100)
-        desc_two += rte_text
-
-    # Извлекаем текст из <div class="product-extra-info">
-    extra_info_div = soup.find('div', class_='product-extra-info')
-    if extra_info_div:
-        extra_info_items = extra_info_div.find_all('li')
-        extra_info_text = '\n'.join([textwrap.fill(item.get_text(strip=True), width=100) for item in extra_info_items])
-        desc_two += extra_info_text
-
-    print(desc_two)
-
-    main_image_element = soup.find('img', class_='Image--lazyLoaded')
-
-    # Переменная для хранения найденного id
-    id = None
-
-    if main_image_element:
-        main_image_url = 'https:' + main_image_element['src']
-
-        match = re.search(r'v=(\d+)', main_image_url)
-        if match:
-            id = match.group(1)
-            print("ID:", id)
+    if compare_price_tag:
+        price = compare_price_tag.get_text(" ", strip=True)
+        price = price.replace("Regular price", "").replace("₹", "").replace(",", "").strip()
     else:
-        print('Главное фото товара не найдено.')
+        price = ""
 
-    # Находим <div> элемент с классом "Product__Slideshow"
-    slideshow_div = soup.find('div', class_='Product__Slideshow')
+    print("Old price:", price)
 
-    # Если найден <div> элемент с классом "Product__Slideshow"
+    desc_parts = []
+
+    story = soup.find("button", string="Story")
+    if story:
+        story_text = story.find_next("div", class_="product-tab")
+        if story_text:
+            text = story_text.get_text(" ", strip=True)
+            if text:
+                desc_parts.append(text)
+
+    description = soup.find("button", string="Description")
+    if description:
+        desc_text = description.find_next("div", class_="product-tab")
+        if desc_text:
+            text = desc_text.get_text(" ", strip=True)
+            if text:
+                desc_parts.append(text)
+
+    extra_info = soup.select_one(".product-extra-info")
+    if extra_info:
+        text = extra_info.get_text(" ", strip=True)
+        if text:
+            desc_parts.append(text)
+
+    # 🔥 ВАЖНО: превращаем список в чистую строку
+    full_desc = " ".join(desc_parts).strip() if desc_parts else "N/A"
+
+    print("Descriptions:", full_desc)
+
+
+    BASE_URL = "https://frenchcrown.in"
+
+    # -----------------------------
+    # PRODUCT ID (оставляем твою логику, но улучшаем fallback)
+    # -----------------------------
+    main_image_element = soup.find("img", class_="Image--lazyLoaded")
+
+    product_id = str(random.randint(10**8, 10**9 - 1))
+    print("ID:", product_id)
+
+    # -----------------------------
+    # IMAGES (исправлено полностью)
+    # -----------------------------
+    slideshow_div = soup.find("div", class_="product-gallery__image-list")
+
+    image_urls = []
+
     if slideshow_div:
-        # Инициализируем переменную для хранения списка фото товара
-        image_urls = []
+        img_elements = slideshow_div.find_all("img")
 
-        # Находим все <img> элементы внутри слайдшоу
-        img_elements = slideshow_div.find_all('img')
+        for img in img_elements:
 
-        # Итерируемся по каждому <img> элементу
-        for img_element in img_elements:
-            # Извлекаем значение атрибута src
-            src = 'https:' + img_element['src']
+            # 1. Пытаемся взять srcset (лучшее качество до 1000px)
+            srcset = img.get("srcset")
 
-            # Проверяем, что значение атрибута src не содержит "data:image"
-            if 'data:image' not in src:
-                # Добавляем значение атрибута src в список фото товара
-                image_urls.append(src)
-                print('Фото:', src)
+            selected_url = None
 
-    else:
-        print('Слайдшоу товара не найдено.')
+            if srcset:
+                candidates = []
 
-    size_title = "Select Size"
-    print('size_title:', size_title)
+                for part in srcset.split(","):
+                    url_part = part.strip().split(" ")[0]
 
-    try:
-        label_elements = soup.find('div', class_='Popover__ValueList')
-        if label_elements:
-            formatted_labels = [label.text.strip() for label in label_elements if label.text.strip()]
-            labels = '|'.join(formatted_labels)
-        else:
-            labels = ''
-    except AttributeError as e:
-        print("Error occurred while parsing label elements:", e)
-        labels = ''
+                    # убираем протокол
+                    if url_part.startswith("//"):
+                        url_part = "https:" + url_part
+                    elif url_part.startswith("/"):
+                        url_part = urljoin(BASE_URL, url_part)
 
-    print(labels)
+                    # достаем width
+                    match = re.search(r"width=(\d+)", url_part)
+                    if match:
+                        width = int(match.group(1))
 
-    # color_title = "Select Color"
-    # print('Title color: ', color_title)
-    #
-    # color_vars = soup.find_all('input', class_='color-select-input', attrs={'name': 'color'})
-    # values = [color_var.get('value') for color_var in color_vars if color_var.get('value')]
-    # values_str = '|'.join(values)
-    #
-    # print('Color:', values_str)
+                        if width <= 1000:
+                            candidates.append((width, url_part))
 
+                if candidates:
+                    selected_url = max(candidates, key=lambda x: x[0])[1]
+
+            # 2. fallback на src
+            if not selected_url:
+                src = img.get("src")
+                if src:
+                    if src.startswith("//"):
+                        src = "https:" + src
+                    elif src.startswith("/"):
+                        src = urljoin(BASE_URL, src)
+
+                    selected_url = src
+
+            # 3. фильтр мусора
+            if selected_url and "data:image" not in selected_url:
+                image_urls.append(selected_url)
+
+    print("Images:", image_urls)
+
+    labels = []
+
+    variant_picker = soup.find("variant-picker")
+
+    if variant_picker:
+        option_buttons = variant_picker.select(
+            'x-listbox button[role="option"]'
+        )
+
+        for btn in option_buttons:
+            size = btn.get("value", "").strip()
+
+            # пропускаем служебную кнопку
+            if size and size != "your-size-not-available":
+                labels.append(size)
+
+    print("Sizes:", labels)
 
     data = {
-        'title': title,
-        'price': price,
-        'brand': brand,
-        'story_description': formatted_text,
-        'category': category,
-        'sub_category': sub_category,
-        'image_urls': ', '.join(image_urls),  # Заменил переменную src на image_urls
-        'size_title': size_title,
-        'size': labels,
-        'description': desc_two,
-        'id': id,
+        "title": title,
+        "price": price,
+        "brand": brand,
+        "category": category,
+        "subcategory": subcategory,
+        "imageurls": ", ".join(image_urls),
+        "size": ", ".join(labels) if labels else "N/A",
+        "description": full_desc,
+        "id": product_id,
+        "product_url": url,
     }
-    write_data_csv(FILEPARAMS, data)
+
+    write_data(FILEPARAMS, data)
 
 
 def main():
-    order = ['title', 'price', 'brand', 'story_description', 'category', 'sub_category', 'image_urls', 'size_title', 'size', 'description', 'id']
+    order = ["title", "price", "brand", "category", "subcategory", "imageurls", "size", "description", "id", "product_url"]
     create_csv(FILEPARAMS, order)
-    with open('templates/../../../urls_csv/urls_women_sale.csv', 'r', encoding='utf-8') as file:
+
+    with open(
+            r"C:\Users\Admin\PycharmProjects\mother_pars\templates\frenchcrown\urls_csv\urls_women_sale.csv",
+            "r",
+            encoding="utf-8"
+    ) as file:
         for line in csv.DictReader(file):
-            url = line['url']
+            url = line["url"]
             get_data(url)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
